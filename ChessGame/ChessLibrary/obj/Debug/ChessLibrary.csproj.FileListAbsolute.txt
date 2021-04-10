@@ -1,0 +1,9 @@
+G:\толя\Проект\BWChess\ChessGame\ChessLibrary\bin\Debug\ChessLibrary.dll
+G:\толя\Проект\BWChess\ChessGame\ChessLibrary\bin\Debug\ChessLibrary.pdb
+G:\толя\Проект\BWChess\ChessGame\ChessLibrary\obj\Debug\ChessLibrary.csprojAssemblyReference.cache
+G:\толя\Проект\BWChess\ChessGame\ChessLibrary\obj\Debug\ChessLibrary.csproj.CoreCompileInputs.cache
+G:\толя\Проект\BWChess\ChessGame\ChessLibrary\obj\Debug\ChessLibrary.dll
+G:\толя\Проект\BWChess\ChessGame\ChessLibrary\obj\Debug\ChessLibrary.pdb
+G:\толя\Проект\BWChess\ChessGame\ChessLibrary\bin\Debug\Newtonsoft.Json.dll
+G:\толя\Проект\BWChess\ChessGame\ChessLibrary\bin\Debug\Newtonsoft.Json.xml
+G:\толя\Проект\BWChess\ChessGame\ChessLibrary\obj\Debug\ChessLibrary.csproj.CopyComplete
