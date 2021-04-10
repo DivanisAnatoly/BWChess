@@ -1,0 +1,2 @@
+# BWChess
+Course project. 
