@@ -12,7 +12,7 @@ namespace ChessLibrary
         Game game = new Game();
 
         //Начать партию(начальные условия в json строке)
-        public void StartGame(string fen = @"{ 'PiecePosition': 'rnbqkbnr/Pppppppp/8/7Q/2B5/8/PPPPPPPP/RNBQKBNR','InGameColor':'white','Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }")
+        public void StartGame(string fen = @"{ 'PiecePosition': 'rnbqkbnr/Pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR','InGameColor':'white','Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }")
         {
             game.StartGame(fen);
         }
@@ -143,18 +143,6 @@ namespace ChessLibrary
         public char GetMyColor() { return game.player1.playerColor == Color.white ? 'w' : 'b'; }
 
         //Получить фигуру по координатам доски
-        public char GetFigureAt(int x, int y) {
-            if ((x < 0) || (x > 7) || (y < 0) || (y > 7)) return 'E'; //E-ошибка (если координаты выходят за пределы доски)
-            return game.desk.GetFigureAt(x, y); 
-        }
-
-        public char GetFigureAt(string pieceSquare)
-        {
-            int pX = pieceSquare[0] - 'a';
-            int pY = pieceSquare[1] - '1'; 
-            
-            if(pieceSquare.Length!=2 || ((pX < 0) || (pX > 7) || (pY < 0) || (pY > 7))) return 'E'; //E-ошибка (если координаты выходят за пределы доски)
-            return game.desk.GetFigureAt(pX, pY);
-        }
+        public char GetFigureAt(int x, int y) { return game.desk.GetFigureAt(x, y); }
     }
 }
