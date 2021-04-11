@@ -23,56 +23,93 @@ namespace Visualizator3000
                 Console.WriteLine();
                 Console.WriteLine(gameManager.getGameFen());
                 Console.WriteLine();
-                list = gameManager.GetAllAvaibleMoves();
-                if (list.Count == 0) break;
-                foreach(string m in list)
-                    Console.Write(m + "    ");
 
-                Console.WriteLine(gameManager.IsCheck() ? "CHECK" : "-");
+                //list = gameManager.GetAllAvaibleMoves();
+                //if (list.Count == 0) break;
+                //foreach(string m in list)
+                //Console.Write(m + "    ");
+
+                if (gameManager.IsCheck())
+                {
+                    Console.WriteLine("CHECK ");
+                    if (gameManager.IsMate())
+                    {
+                        if (gameManager.GetMyColor() == gameManager.GetInGameColor())
+                            Console.WriteLine("MATE\nYOU LOSE!");
+                        else
+                            Console.WriteLine("MATE\nYOU WIN!");
+                        break;
+                    }
+                }
+                else {
+                    if (gameManager.IsPate()) { 
+                        Console.WriteLine("PATE!");
+                        break;
+                    }
+                }
 
                 if (gameManager.GetMyColor() == gameManager.GetInGameColor())
                 {
-                    string move = Console.ReadLine(); 
-                    if (move == "q") break;
-                    if (move.Length == 2)
+                    string move;
+                    string pieceSquare = "";
+                    string moveToSquare;
+
+                    if (ChoosePiece(ref pieceSquare, gameManager))
                     {
-                        Print(PrintPieceMoves(move, gameManager));
-                        Console.ReadKey();
-                        continue;
+                        while (true)
+                        {
+                            moveToSquare = Console.ReadLine();
+                            move = (gameManager.GetFigureAt(pieceSquare) + pieceSquare + moveToSquare).ToString();
+                            if (String.Compare(moveToSquare, "0-0-0") == 0 || String.Compare(moveToSquare, " 0-0 ") == 0) move = moveToSquare;
+
+                            if (list.Contains(move))
+                            {
+                                gameManager.PlayerMove(move);
+                                break;
+                            }
+                            if (moveToSquare == "q") break;
+                        }
                     }
-                    if(list.Contains(move))gameManager.PlayerMove(move);
-                }
+                }  
                 else
                 {
                     gameManager.BotMove();
                 }
             }
             
-            if(gameManager.IsPate()) Console.WriteLine("PATE!");
-
-            if (gameManager.IsMate())
-                if(gameManager.GetMyColor() == gameManager.GetInGameColor())
-                    Console.WriteLine("YOU LOSE!");
-                else
-                    Console.WriteLine("YOU WIN!");
-
             Console.ReadKey();
         }
 
-        static string PrintPieceMoves(string from, GameManager gameManager)
+        private static bool ChoosePiece(ref string pieceSquare, GameManager gameManager)
+        {
+            pieceSquare = Console.ReadLine();
+            if (pieceSquare.Length != 2)
+                return false;
+            else
+            {
+                char piece = gameManager.GetFigureAt(pieceSquare);
+                if(piece == 'E' || piece == '.') return false;
+                if(gameManager.GetMyColor() == 'w' &&  !(piece>='A' && piece <= 'Z')) return false;
+                list = gameManager.GetAllAvaibleMoves();
+                //if (list.length == 0) return false;
+                Print(PrintPieceMoves(pieceSquare, gameManager));
+            }
+            return true;
+        }
+
+
+        static string PrintPieceMoves(string pieceSquare, GameManager gameManager)
         {
             List<string> pieceMoves = new List<string>(); 
 
             string cell; 
-            int pX = from[0]-'a';
-            int pY = from[1]-'1';
-            char piece = gameManager.GetFigureAt(pX, pY);
+            char piece = gameManager.GetFigureAt(pieceSquare);
             bool longCastling = (piece == 'K' && list.Contains("0-0-0"));
             bool shortCastling = (piece == 'K' && list.Contains(" 0-0 "));
 
             
             foreach(string moveStr in list)
-                if (moveStr.Contains(from)) pieceMoves.Add(moveStr);
+                if (moveStr.Contains(pieceSquare)) pieceMoves.Add(moveStr);
 
             string text = "\t\t\t\t\t\t  +-----------------+\n";
             for (int y = 7; y >= 0; y--)
@@ -81,7 +118,7 @@ namespace Visualizator3000
 
                 for (int x = 0; x < 8; x++)
                 {
-                    cell = (piece + from + (char)('a' + x) + (y + 1)).ToString();
+                    cell = (piece + pieceSquare + (char)('a' + x) + (y + 1)).ToString();
 
                     if (pieceMoves.Contains(cell) || pieceMoves.Contains((cell+'Q').ToString()) )
                         if (gameManager.GetFigureAt(x, y)=='.')
