@@ -1,6 +1,9 @@
-# BWChess ♟️
+# Library update ⚙️
 
-This repository contains coursework on OOP. 
-The system simulates a game of chess. The goal of the work is to create a 
-client-server application in C # for playing chess against an AI or another player + create a game engine for chess. 
-A more detailed description of the project goals can be found at the link https://docs.google.com/presentation/d/1QNtv9mQoO61kBL8dfeWhh9lTHmyjAp6nZzb7SnOgfnA/edit?usp=sharing
+This branh is intended to improve the game engine. 
+It is planned to improve the calculation of moves 
+(the calculation is performed not for all pieces 
+after move, but only for the selected piece). 
+The calculated moves are cached. It is also planned 
+to add new entities containing the pieces's squares 
+available for the move to avoid unnecessary recalculations.
