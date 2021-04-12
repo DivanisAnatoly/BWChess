@@ -8,7 +8,7 @@ public class PieceCreator : MonoBehaviour
     // Start is called before the first frame update
     PieceMoves pieceMoves = new PieceMoves();
   
-    string fen = @"RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr";
+    public static string fen = @"R1BQK11R/PPPP2PP/2N2P2/p3P3/4p3/3q4/1ppp1pp1/rnb1kbnr";
 
     void Start()
     {
@@ -25,21 +25,17 @@ public class PieceCreator : MonoBehaviour
     }
 
     // Update is called once per frame
-        void ShowFigures()
-        {
-            string figure;
+    void ShowFigures()
+    {
+        char figure;
         int countCreatedFigures = 0;
         for (int y = 7; y >= 0; y--)
             for (int x = 0; x < 8; x++)
             {
-
-                figure = GetFigureAt(x, y);
-                if (figure == "8") 
-                {
-                    continue;
-                }
                 
-                PlaceFigure("box" + countCreatedFigures, figure, x, y);
+                figure = GetFigureAt(x, y);
+                if (figure == '.') continue;
+                PlaceFigure("box" + countCreatedFigures, figure.ToString(), x, y);
                 countCreatedFigures++;
             }
     }
@@ -60,12 +56,14 @@ public class PieceCreator : MonoBehaviour
     }
 
     
-    string GetFigureAt(int x, int y)
+    char GetFigureAt(int x, int y)
     {
-        string[] linesBoard = fen.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-        if (x >= linesBoard[y].Length) return "8";
-        return linesBoard[y][x].ToString();
-    }
+        
+        for (int j = 8; j >= 2; j--)
+            fen = fen.Replace(j.ToString(), (j - 1).ToString() + "1");
+        fen = fen.Replace("1", ".");
 
-    
+        string[] linesBoard = fen.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+        return linesBoard[y][x];
+    }
 }

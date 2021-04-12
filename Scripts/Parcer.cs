@@ -9,12 +9,13 @@ public struct Parser
     public GameObject SquareFromMove { get; set; }
     public GameObject SquareToMove { get; set; }
 
+
     public Parser(string chessMove)
     {
         this.Name = GameObjects.TryGetObject(chessMove.Substring(0, 1));
-        this.SquareFromMove = GameObject.Find(chessMove.Substring(1, 2));
-        this.SquareToMove = GameObject.Find(chessMove.Substring(3));
-
+        this.SquareFromMove = GameObjects.TryGetObject(chessMove.Substring(1, 2));
+        this.SquareToMove = GameObjects.TryGetObject(chessMove.Substring(3));
+        
     }
 
     public void ParseFigureMove(string chessMove) //Функция автоматического перемещения фигур

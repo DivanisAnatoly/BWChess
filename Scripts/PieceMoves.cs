@@ -7,7 +7,7 @@ using UnityEngine;
 public class PieceMoves
 {
     Board board = new Board();
-    static List<string> ProbableMoves = new List<string>() { "Pa2a4", "Pa2a3", "Nb1c3" };
+    static List<string> ProbableMoves = new List<string>() { "Pa2a4", "Pa2a3", "Nb1c3", "Nb1a3", "Pb2b4", "Nc3a4","pa4a3"};
 
     enum State
     {
@@ -89,14 +89,22 @@ public class PieceMoves
     void HighlightSquare(Transform clickedItem)
     {
         List<Parser> parser = GetParseListForMoves();
-        
+
         for (int i = 0; i < ProbableMoves.Count; i++)
         {
+            Transform itemToMove = Board.GetItemAt(parser[i].SquareToMove.transform.position);
             if (Board.CheckSquare(clickedItem.position) == Board.CheckSquare(parser[i].SquareFromMove.transform.position) && 
                 clickedItem.name.ToString() == parser[i].Name.name.ToString())
             {
-                parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(255, 215, 0f, .25f);
+                if (itemToMove && board.CheckEnemyFigure(itemToMove, clickedItem.gameObject))
+                {
+                    board.PlaceAMSquare(parser[i].SquareToMove, "Attack");
+                    parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                }
+                else
+                parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
             }
+        
         }
         return;
     }
@@ -105,14 +113,15 @@ public class PieceMoves
     {
         bool check = false;
         List<Parser> parser = GetParseListForMoves();
-        Color colorSquare = new Color(255, 215, 0f, .25f);
+        Color colorSquare = new Color(1f, 1f, 1f, 1f);
         for (int i = 0; i < ProbableMoves.Count; i++)
         {
             if (goSquare == parser[i].SquareToMove && goSquare.GetComponent<SpriteRenderer>().color == colorSquare)
             {
                 check = true;
             }
-            parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 0f, 0f);
+            board.PlaceAMSquare(parser[i].SquareToMove, "Movement");
+            parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
         }
         return check;
     }

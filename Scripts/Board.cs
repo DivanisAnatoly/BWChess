@@ -49,9 +49,9 @@ public class Board
         goFigure = GetItemAt(goSquare.transform.position);
         if (!goFigure) return true;
         GameObject fieldForDefeatFigures = GameObjects.TryGetObject("Square" + goFigure.name[0]);
-        
-        if ((goFigure.name[0] >= 'A' && goFigure.name[0] <= 'Z' && item.name[0] >= 'a' && item.name[0] <= 'z') ||
-           (goFigure.name[0] >= 'a' && goFigure.name[0] <= 'z' && item.name[0] >= 'A' && item.name[0] <= 'Z'))
+        bool checkEnemy = CheckEnemyFigure(goFigure, item);
+
+        if (checkEnemy)
         {
             goFigure.transform.position = fieldForDefeatFigures.transform.position;
             RaycastHit2D[] figures = Physics2D.RaycastAll(fieldForDefeatFigures.transform.position, fieldForDefeatFigures.transform.position, 0.5f); //Заготовка для счётчика
@@ -71,5 +71,24 @@ public class Board
         if (CheckSquare(figure.position).x == 99999 && CheckSquare(figure.position).y == 99999)
             return false;
         return true;
+    }
+
+    public bool CheckEnemyFigure(Transform goFigure, GameObject item)
+    {
+        if ((goFigure.name[0] >= 'A' && goFigure.name[0] <= 'Z' && item.name[0] >= 'a' && item.name[0] <= 'z') ||
+           (goFigure.name[0] >= 'a' && goFigure.name[0] <= 'z' && item.name[0] >= 'A' && item.name[0] <= 'Z'))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public void PlaceAMSquare(GameObject goSquare, string spriteName)
+    {
+
+        GameObject Sprite = GameObjects.TryGetObject(spriteName);
+
+        goSquare.GetComponent<SpriteRenderer>().sprite = Sprite.GetComponent<SpriteRenderer>().sprite;
+
     }
 }
