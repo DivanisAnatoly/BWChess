@@ -7,7 +7,8 @@ using UnityEngine;
 public class PieceMoves
 {
     Board board = new Board();
-    static List<string> ProbableMoves = new List<string>() { "Pa2a4", "Pa2a3", "Nb1c3", "Nb1a3", "Pb2b4", "Nc3a4","pa4a3", "Ph7h8"};
+    static List<string> ProbableMoves = new List<string>() { "pb2b1", "pc3c2", "ka3a2", "ka3b3", "ka3a4", "ka3b4", "Pg6f7", 
+        "Pg6g7", "Nf6g8", "Nf6g4", "Nf6h5", "Nf6h7", "Nf6d5", "Nf6d7", "Nf6e4", "Nf6e8", "Kg5f5", "Kg5h5", "Kg5h6", "Kg5h4", "Kg5g4", "Kg5f4", "Pf7f8" };
     ChessPiece transformPawn = new ChessPiece();
     string newPawn;
 

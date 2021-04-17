@@ -8,7 +8,7 @@ public class PieceCreator : MonoBehaviour
     // Start is called before the first frame update
     PieceMoves pieceMoves = new PieceMoves();
   
-    public static string fen = @"RNBQK111/PP111PPP/8/8/8/8/pppppppP/rnbqkbn1";
+    public static string fen = @"8/1p6/k1p5/8/6K1/5NP1/5p2/8";
 
     void Start()
     {

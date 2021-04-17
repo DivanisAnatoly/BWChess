@@ -26,7 +26,7 @@ public class ChessPiece
         if (figures.Length != 0)
         {
             GameObjects.TryGetObject(figures[0].transform.name).transform.position = pawn.transform.position;
-            pawn.transform.position = GameObjects.TryGetObject("SquareP").transform.position;
+            pawn.transform.position = GameObjects.TryGetObject("Square" + pawn.name).transform.position;
             pawn.tag = "Static";
             figures[0].transform.gameObject.tag = "Active";
             return figures[0].transform.name;
