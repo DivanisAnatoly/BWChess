@@ -8,7 +8,7 @@ public class PieceCreator : MonoBehaviour
     // Start is called before the first frame update
     PieceMoves pieceMoves = new PieceMoves();
   
-    public static string fen = @"R1BQK11R/PPPP2PP/2N2P2/p3P3/4p3/3q4/1ppp1pp1/rnb1kbnr";
+    public static string fen = @"RNBQK111/PP111PPP/8/8/8/8/pppppppP/rnbqkbn1";
 
     void Start()
     {
@@ -35,24 +35,19 @@ public class PieceCreator : MonoBehaviour
                 
                 figure = GetFigureAt(x, y);
                 if (figure == '.') continue;
-                PlaceFigure("box" + countCreatedFigures, figure.ToString(), x, y);
+                PlaceFigure(figure.ToString(), x, y);
                 countCreatedFigures++;
+                Debug.Log(countCreatedFigures);
             }
     }
 
-    void PlaceFigure(string box, string figure, int x, int y)
+    void PlaceFigure(string figure, int x, int y)
     {
-        Debug.Log(box + " " + figure + (char)(x + 'a') + (y));
-        GameObject goBox = GameObjects.TryGetObject(box);
+        Debug.Log(" " + figure + (char)(x + 'a') + (y));
         GameObject goFigure = GameObjects.TryGetObject(figure);
         GameObject goSquare = GameObjects.TryGetObject("" + (char)(x + 'a') + (y + 1));
-
-
-        var spriteFigure = goFigure.GetComponent<SpriteRenderer>();
-        var spriteBox = goBox.GetComponent<SpriteRenderer>();
-        spriteBox.sprite = spriteFigure.sprite;
-        goBox.transform.position = goSquare.transform.position;
-        goBox.name = Convert.ToString(figure);
+        goFigure.transform.position = goSquare.transform.position;
+        goFigure.tag = "Active";
     }
 
     

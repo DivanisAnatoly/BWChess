@@ -54,6 +54,7 @@ public class Board
         if (checkEnemy)
         {
             goFigure.transform.position = fieldForDefeatFigures.transform.position;
+            goFigure.tag = "Static";
             RaycastHit2D[] figures = Physics2D.RaycastAll(fieldForDefeatFigures.transform.position, fieldForDefeatFigures.transform.position, 0.5f); //Заготовка для счётчика
             Debug.Log(figures.Length);
             return true;

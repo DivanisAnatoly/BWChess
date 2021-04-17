@@ -7,12 +7,15 @@ using UnityEngine;
 public class PieceMoves
 {
     Board board = new Board();
-    static List<string> ProbableMoves = new List<string>() { "Pa2a4", "Pa2a3", "Nb1c3", "Nb1a3", "Pb2b4", "Nc3a4","pa4a3"};
+    static List<string> ProbableMoves = new List<string>() { "Pa2a4", "Pa2a3", "Nb1c3", "Nb1a3", "Pb2b4", "Nc3a4","pa4a3", "Ph7h8"};
+    ChessPiece transformPawn = new ChessPiece();
+    string newPawn;
 
     enum State
     {
         none,
-        drop
+        drop,
+        transform
     }
 
 
@@ -40,11 +43,22 @@ public class PieceMoves
                     return false;
                 }
                 break;
+            case State.transform:
+                if (IsMouseButtonPressed())
+                {
+                    newPawn += transformPawn.TransformPawn(item);
+                    Debug.Log(newPawn);
+                    state = State.none;
+                    item = null;
+                    return false;
+                }
+                break;
+
         }
         return false;
     }
 
-    bool IsMouseButtonPressed()
+    static public bool IsMouseButtonPressed()
     {
         return Input.GetMouseButtonDown(0);
     }
@@ -73,8 +87,8 @@ public class PieceMoves
         Vector2 coordsSquare = Board.CheckSquare(GetClickPosition());   //Можно удалить, существует только ради вывода имени клетки
         Vector2 coordsItem = Board.CheckSquare(item.transform.position);   //А здесь использовать метод GetItemAt
         GameObject goSquare = GameObjects.TryGetObject("" + (char)(coordsSquare.x + 'a') + (coordsSquare.y + 1));
-        bool check = ReverseColorSquare(goSquare);
-        if (check)
+        int check = ReverseColorSquare(goSquare);
+        if (check == 1 || check == 11)
             if (goSquare && (coordsItem != coordsSquare) && board.CheckTryCutFigure(goSquare, item))
             {
                 item.transform.position = goSquare.transform.position;
@@ -82,8 +96,17 @@ public class PieceMoves
                               + (char)(coordsSquare.x + 'a') + (coordsSquare.y + 1));
             }
         item.transform.localScale = new Vector3(14, 14, 0f);
-        state = State.none;
-        item = null;
+        if (check == 11)
+        {
+            newPawn = item.name + (char)(coordsItem.x + 'a') + "" + (coordsItem.y + 1)
+                      + (char)(coordsSquare.x + 'a') + (coordsSquare.y + 1);
+            state = State.transform;
+        }
+        else
+        {
+            state = State.none;
+            item = null;
+        }
     }
 
     void HighlightSquare(Transform clickedItem)
@@ -109,16 +132,19 @@ public class PieceMoves
         return;
     }
 
-    bool ReverseColorSquare(GameObject goSquare)
+    int ReverseColorSquare(GameObject goSquare)
     {
-        bool check = false;
+        int check = 0;
         List<Parser> parser = GetParseListForMoves();
         Color colorSquare = new Color(1f, 1f, 1f, 1f);
         for (int i = 0; i < ProbableMoves.Count; i++)
         {
             if (goSquare == parser[i].SquareToMove && goSquare.GetComponent<SpriteRenderer>().color == colorSquare)
             {
-                check = true;
+                check = 1;
+                if ((parser[i].Name.name == 'P'.ToString() && parser[i].SquareToMove.name[1] == '8') ||
+                    parser[i].Name.name == 'p'.ToString() && parser[i].SquareToMove.name[1] == '1')
+                    check = 11;
             }
             board.PlaceAMSquare(parser[i].SquareToMove, "Movement");
             parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
