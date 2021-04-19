@@ -54,6 +54,7 @@
     <Compile Include="GameManager.cs" />
     <Compile Include="Gamer.cs" />
     <Compile Include="King.cs" />
+    <Compile Include="Moves.cs" />
     <Compile Include="Night.cs" />
     <Compile Include="Pawn.cs" />
     <Compile Include="Piece.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="Queen.cs" />
     <Compile Include="Rook.cs" />
     <Compile Include="Square.cs" />
+    <Compile Include="Vectors.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

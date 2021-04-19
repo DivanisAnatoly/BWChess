@@ -6,113 +6,118 @@ using System.Threading.Tasks;
 
 namespace ChessLibrary
 {
-    
+
     abstract class Piece
     {
-        public Color pieceColor { get; private set; }
-        public char key { get; private set; }
+        protected Vectors movesVector;
+
+        internal readonly Color pieceColor;
+        internal readonly char pieceKey;
 
 
-        public Piece(char key, Color pieceColor)
+        internal Piece(char pieceKey, Color pieceColor)
         {
-            this.key = key;
+            this.pieceKey = pieceKey;
             this.pieceColor = pieceColor;
         }
 
+
         //просчет всех возможных ходов фигуры
-        public string getPieceMoves(Desk desk, Square ownSquare)
+        internal Vectors GetPieceMoves(Desk desk, Square ownSquare)
         {
-            Square[,] avaibleSquares = new Square[8,8];
+            Square[,] avaibleSquares = new Square[8, 8];
+            movesVector = new Vectors{startPosition = ownSquare.Name, vectorPieceKey = pieceKey };
 
             for (int y = 7; y >= 0; y--)
                 for (int x = 0; x < 8; x++)
                     avaibleSquares[x, y] = new Square(x, y);
 
-            avaibleSquares = CanMoveTo(avaibleSquares, desk.deskSquares);
             avaibleSquares = CanFigureMove(avaibleSquares, desk, ownSquare);
 
-            string result = "";
             //добавляем ходы в список
-            foreach (Square square in avaibleSquares)
-                if (square != Square.none)
+            foreach (Square sq in avaibleSquares)
+                if (sq != Square.none)
                 {
-                    if ((this.key=='P' || this.key == 'p') && (square.Name.Contains('1') || square.Name.Contains('8')) )//превращение пешки
+                    string sqName = sq.Name;
+                    if ((pieceKey == 'P' || pieceKey == 'p') && (sqName.Contains('1') || sqName.Contains('8')))//превращение пешки
                     {
-                        result += this.key + ownSquare.Name + square.Name + (pieceColor==Color.white ? "Q " : "q ");
-                        result += this.key + ownSquare.Name + square.Name + (pieceColor == Color.white ? "N " : "n ");
-                        result += this.key + ownSquare.Name + square.Name + (pieceColor == Color.white ? "R " : "r ");
-                        result += this.key + ownSquare.Name + square.Name + (pieceColor == Color.white ? "B " : "b ");
+                        string pawnTransfMoves = (pieceColor == Color.white)
+                            ? sqName + "Q " + sqName + "N " + sqName + "R " + sqName + "B"
+                            : sqName + "q " + sqName + "n " + sqName + "r " + sqName + "b";
+                        movesVector.avaibleSquares.AddRange(pawnTransfMoves.Split());
                     }
                     else//обычные ходы
-                    {
-                        result += this.key + ownSquare.Name + square.Name + " ";
-                    }
+                        movesVector.avaibleSquares.Add(sqName);
                 }
-                    
-            if(result.Length>0) result = result.Remove(result.Length - 1);
-            return result;
+
+            return movesVector;
         }
 
-        //отсеиваем ходы на клетки с фигурами своего цвета
-        public Square[,] CanMoveTo(Square[,] avaibleSquares, Square[,] deskSquares)
-        {
-            foreach (Square square in deskSquares)
-            {
-                if (square.ownedPiece != null && square.ownedPiece.pieceColor == this.pieceColor)
-                    avaibleSquares[square.x, square.y] = Square.none;
-            }
-            return avaibleSquares;
-        }
 
-        //из оставшихся клеток выбираем доступные для конкретной фигуры
-        public abstract Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare);
+        internal abstract Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare);
 
 
-        public void CanMoveStraight(Square[,] avaibleSquares, Square[,] deskSquares, Square ownSquare)
+        protected void CanMoveStraight(Square[,] avaibleSquares, Square[,] deskSquares, Square ownSquare)
         {
             foreach (Square square in avaibleSquares)
             {
-                if (square != Square.none && !(ownSquare.AbsDeltaX(square) == 0 || ownSquare.AbsDeltaY(square) == 0))
+                if (square == ownSquare) { avaibleSquares[square.x, square.y] = Square.none; continue; }
+
+                if (!(ownSquare.AbsDeltaX(square) == 0 || ownSquare.AbsDeltaY(square) == 0))
                     avaibleSquares[square.x, square.y] = Square.none;
             }
+
             bool blocked = false;
             for (int x = ownSquare.x + 1; x < 8; x++)
             {
-                if (blocked) avaibleSquares[x, ownSquare.y] = Square.none;
-                if (avaibleSquares[x, ownSquare.y] == Square.none) blocked = true;
-                if (avaibleSquares[x, ownSquare.y] != Square.none && deskSquares[x, ownSquare.y].ownedPiece != null) blocked = true;
-
+                Square sq = deskSquares[x, ownSquare.y];
+                CheckSquare(avaibleSquares, sq, x, ownSquare.y, ref blocked);
             }
+
             blocked = false;
             for (int x = ownSquare.x - 1; x >= 0; x--)
             {
-                if (blocked) avaibleSquares[x, ownSquare.y] = Square.none;
-                if (avaibleSquares[x, ownSquare.y] == Square.none) blocked = true;
-                if (avaibleSquares[x, ownSquare.y] != Square.none && deskSquares[x, ownSquare.y].ownedPiece != null) blocked = true;
+                Square sq = deskSquares[x, ownSquare.y];
+                CheckSquare(avaibleSquares, sq, x, ownSquare.y, ref blocked);
             }
+
             blocked = false;
             for (int y = ownSquare.y + 1; y < 8; y++)
             {
-                if (blocked) avaibleSquares[ownSquare.x, y] = Square.none;
-                if (avaibleSquares[ownSquare.x, y] == Square.none) blocked = true;
-                if (avaibleSquares[ownSquare.x, y] != Square.none && deskSquares[ownSquare.x, y].ownedPiece != null) blocked = true;
-
+                Square sq = deskSquares[ownSquare.x, y];
+                CheckSquare(avaibleSquares, sq, ownSquare.x, y, ref blocked);
             }
+
             blocked = false;
             for (int y = ownSquare.y - 1; y >= 0; y--)
             {
-                if (blocked) avaibleSquares[ownSquare.x, y] = Square.none;
-                if (avaibleSquares[ownSquare.x, y] == Square.none) blocked = true;
-                if (avaibleSquares[ownSquare.x, y] != Square.none && deskSquares[ownSquare.x, y].ownedPiece != null) blocked = true;
+                Square sq = deskSquares[ownSquare.x, y];
+                CheckSquare(avaibleSquares, sq, ownSquare.x, y, ref blocked);
             }
         }
 
 
-        public void CanMoveDiagonal(Square[,] avaibleSquares, Square[,] deskSquares, Square ownSquare)
+        private void CheckSquare(Square[,] avaibleSquares, Square square, int x, int y, ref bool blocked)
+        {
+            if (blocked) { avaibleSquares[x, y] = Square.none; return; }
+            if (square.ownedPiece != null)
+            {
+                if (square.ownedPiece.pieceColor == pieceColor)
+                {
+                    avaibleSquares[x, y] = Square.none;
+                    movesVector.occupiedSquares.Add(square.Name);
+                }
+                blocked = true;
+            }
+        }
+
+
+        protected void CanMoveDiagonal(Square[,] avaibleSquares, Square[,] deskSquares, Square ownSquare)
         {
             foreach (Square square in avaibleSquares)
             {
-                if (square != Square.none && !(ownSquare.AbsDeltaX(square)  == ownSquare.AbsDeltaY(square)))
+                if (square == ownSquare) { avaibleSquares[square.x, square.y] = Square.none; continue; }
+                if (!(ownSquare.AbsDeltaX(square) == ownSquare.AbsDeltaY(square)))
                     avaibleSquares[square.x, square.y] = Square.none;
             }
 
@@ -120,39 +125,36 @@ namespace ChessLibrary
             int i = 1;
             while ((ownSquare.x + i <= 7) && (ownSquare.y + i <= 7))
             {
-                if (blocked) avaibleSquares[ownSquare.x+i, ownSquare.y+i] = Square.none;
-                if (avaibleSquares[ownSquare.x + i, ownSquare.y + i] == Square.none) blocked = true;
-                if (avaibleSquares[ownSquare.x + i, ownSquare.y + i] != Square.none && deskSquares[ownSquare.x + i, ownSquare.y + i].ownedPiece != null) blocked = true;
+                Square sq = deskSquares[ownSquare.x + i, ownSquare.y + i];
+                CheckSquare(avaibleSquares, sq, ownSquare.x + i, ownSquare.y + i, ref blocked);
                 i++;
             }
 
             blocked = false; i = 1;
             while ((ownSquare.x + i <= 7) && (ownSquare.y - i >= 0))
             {
-                if (blocked) avaibleSquares[ownSquare.x + i, ownSquare.y - i] = Square.none;
-                if (avaibleSquares[ownSquare.x + i, ownSquare.y - i] == Square.none) blocked = true;
-                if (avaibleSquares[ownSquare.x + i, ownSquare.y - i] != Square.none && deskSquares[ownSquare.x + i, ownSquare.y - i].ownedPiece != null) blocked = true;
+                Square sq = deskSquares[ownSquare.x + i, ownSquare.y - i];
+                CheckSquare(avaibleSquares, sq, ownSquare.x + i, ownSquare.y - i, ref blocked);
                 i++;
             }
 
             blocked = false; i = 1;
             while ((ownSquare.x - i >= 0) && (ownSquare.y + i <= 7))
             {
-                if (blocked) avaibleSquares[ownSquare.x - i, ownSquare.y + i] = Square.none;
-                if (avaibleSquares[ownSquare.x - i, ownSquare.y + i] == Square.none) blocked = true;
-                if (avaibleSquares[ownSquare.x - i, ownSquare.y + i] != Square.none && deskSquares[ownSquare.x - i, ownSquare.y + i].ownedPiece != null) blocked = true;
+                Square sq = deskSquares[ownSquare.x - i, ownSquare.y + i];
+                CheckSquare(avaibleSquares, sq, ownSquare.x - i, ownSquare.y + i, ref blocked);
                 i++;
             }
 
             blocked = false; i = 1;
             while ((ownSquare.x - i >= 0) && (ownSquare.y - i >= 0))
             {
-                if (blocked) avaibleSquares[ownSquare.x - i, ownSquare.y - i] = Square.none;
-                if (avaibleSquares[ownSquare.x - i, ownSquare.y - i] == Square.none) blocked = true;
-                if (avaibleSquares[ownSquare.x - i, ownSquare.y - i] != Square.none && deskSquares[ownSquare.x - i, ownSquare.y - i].ownedPiece != null) blocked = true;
+                Square sq = deskSquares[ownSquare.x - i, ownSquare.y - i];
+                CheckSquare(avaibleSquares, sq, ownSquare.x - i, ownSquare.y - i, ref blocked);
                 i++;
             }
-
         }
+    
+    
     }
 }

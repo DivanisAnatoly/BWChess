@@ -8,28 +8,36 @@ namespace ChessLibrary
 {
     abstract class ChessPlayer
     {
-        public Color playerColor { get; private set; }
-        public List<string> allAvaibleMoves;
+        internal Color playerColor { get; private set; }
+        internal Moves playersMoves;
+        internal string lastMove;
 
 
-        public ChessPlayer(Color playerColor)
+        internal ChessPlayer(Color playerColor, Moves playersMoves, Desk desk)
         {
             this.playerColor = playerColor;
+            this.playersMoves = playersMoves;
+            CalculateMoves(desk);
         }
 
+
         //Просчитать доступные ходы
-        public void CalculateMoves(Desk desk)//Square[,] deskSquares
+        internal void CalculateMoves(Desk desk)
         {
-            allAvaibleMoves = new List<string>();
+            List<Vectors> allPlayerMoves;
+            allPlayerMoves = (playerColor == Color.white) ? playersMoves.whiteMoves : playersMoves.blackMoves;
+
             foreach (Square square in desk.deskSquares) {
                 if (square.ownedPiece != null)
                     if (square.ownedPiece.pieceColor == playerColor)
-                        this.allAvaibleMoves.AddRange((square.ownedPiece.getPieceMoves(desk, square)).Split());
+                        allPlayerMoves.Add(square.ownedPiece.GetPieceMoves(desk, square));
             }
-            allAvaibleMoves.RemoveAll(item => item == "");
         }
+
 
         //Сделать ход
         internal abstract void MakeMove(string move, Desk desk);
+
+
     }
 }

@@ -9,28 +9,33 @@ namespace ChessLibrary
 {
     class Game
     {
+        int moveNumber;
+        internal Desk desk;
+        internal Moves moves;
+        internal ChessPlayer player1;
+        internal ChessPlayer player2;
 
-        public Color inGameColor { get; set; }
-        public int moveNumber { get; private set; }
-        public ForsythEdwardsNotation notation { get; private set; }
-        public Desk desk;
-        public ChessPlayer player1;
-        public ChessPlayer player2;
+        internal Color inGameColor { get; private set; } 
+        internal ForsythEdwardsNotation notation { get; private set; }
+        
 
         //Начать партию
-        public void StartGame(string fen)
+        internal void StartGame(string fen)
         {
             notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(fen);
             inGameColor = notation.InGameColor;
             moveNumber = notation.MoveNumber;
             desk = new Desk(notation);
+            moves = new Moves(desk);
 
-            player1 = new Gamer(Color.white);
-            player2 = new Bot(Color.black);
+            player1 = new Gamer(Color.white, moves, desk);
+            player2 = new Bot(Color.black, moves, desk);
+            moves.UpdateMoves();
         }
 
+
         //Сохранить состояние игры(сохр. в формате ФЭН)
-        public void ParseGameToFEN()
+        internal void ParseGameToFEN()
         {
             Square sqBK = desk.FindKing(Color.black);
             Square sqWK = desk.FindKing(Color.white);
@@ -45,13 +50,16 @@ namespace ChessLibrary
             notation.MoveNumber = moveNumber;
         }
 
+
         //Подготовка к след. ходу
-        internal void PrepareNextMove()
+        internal void PrepareNextMove(string move)
         {
             moveNumber++;
             inGameColor = inGameColor.FlipColor();
             ParseGameToFEN();
+            moves.UpdateMoves(move);
         }
+
 
         //Получить положение фигур представленное в строке
         string FenPieces()
@@ -61,7 +69,7 @@ namespace ChessLibrary
             for (int y = 7; y >= 0; y--)
             {
                 for (int x = 0; x < 8; x++)
-                    sb.Append(pieces[x, y] == null ? '1' : pieces[x, y].key);
+                    sb.Append(pieces[x, y] == null ? '1' : pieces[x, y].pieceKey);
                 if (y > 0) sb.Append('/');
             }
             string eight = "11111111";
@@ -69,5 +77,7 @@ namespace ChessLibrary
                 sb.Replace(eight.Substring(0, j), j.ToString());
             return sb.ToString();
         }
+    
+    
     }
 }
