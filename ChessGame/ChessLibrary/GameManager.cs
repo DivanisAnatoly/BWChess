@@ -13,7 +13,7 @@ namespace ChessLibrary
 
 
         //Начать партию(начальные условия в json строке)
-        public void StartGame(string fen = @"{ 'PiecePosition': 'rnbqk2r/PppppppP/8/8/8/8/PPPPPPPP/RNBQK2R','InGameColor':'white','Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }",string playerColor="none")
+        public void StartGame(string fen = @"{ 'PiecePosition': 'rnbqk2r/Pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R','InGameColor':'white','Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }",string playerColor="none")
         {
             Color color = Color.none;
             if (playerColor == "white" || playerColor == "White") color = Color.white;

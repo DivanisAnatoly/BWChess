@@ -110,13 +110,15 @@ namespace ChessLibrary
         private void CheckSquare(Square[,] avaibleSquares, Square square, int x, int y, ref bool blocked)
         {
             if (blocked) { avaibleSquares[x, y] = Square.none; return; }
-
-            if (square.ownedPiece.pieceColor == pieceColor)
+            if (square.ownedPiece != nullPiece)
             {
-                avaibleSquares[x, y] = Square.none;
-                movesVector.occupiedSquares.Add(square.Name);
+                if (square.ownedPiece.pieceColor == pieceColor)
+                {
+                    avaibleSquares[x, y] = Square.none;
+                    movesVector.occupiedSquares.Add(square.Name);
+                }
+                blocked = true;
             }
-            blocked = true;
         }
 
 
