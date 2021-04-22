@@ -8,9 +8,7 @@ namespace ChessLibrary
 {
     class Bishop : Piece
     {
-        internal Bishop(char key, Color pieceColor) : base(key, pieceColor)
-        {
-        }
+        internal Bishop(PiecesKeys pieceKey, Color pieceColor) : base(pieceKey, pieceColor) { }
 
 
         internal override Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare)

@@ -13,14 +13,18 @@ namespace ChessLibrary
 
 
         //Начать партию(начальные условия в json строке)
-        public void StartGame(string fen = @"{ 'PiecePosition': 'rnbqkbnr/Pppppppp/8/7Q/2B5/8/PPPPPPPP/RNBQK2R','InGameColor':'white','Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }")
+        public void StartGame(string fen = @"{ 'PiecePosition': 'rnbqk2r/PppppppP/8/8/8/8/PPPPPPPP/RNBQK2R','InGameColor':'white','Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }",string playerColor="none")
         {
-            game.StartGame(fen);
+            Color color = Color.none;
+            if (playerColor == "white" || playerColor == "White") color = Color.white;
+            else if (playerColor == "black" || playerColor == "Black") color = Color.black;
+
+            game.StartGame(fen,color);
         }
 
 
         //Получить ФЭН игры (json строка)
-        public string getGameFen()
+        public string GetGameFen()
         {
             game.ParseGameToFEN();
             return JsonConvert.SerializeObject(game.notation);
@@ -31,9 +35,9 @@ namespace ChessLibrary
         public List<string> GetAllAvaibleMoves(string pieceSquare="none")
         {
             if (pieceSquare == "none")
-                return game.moves.GetPlayerMoves(game.inGameColor);
+                return game.moves.GetPlayerMoves(game.player1.playerColor);
             else
-                return game.moves.GetPieceMoves(game.inGameColor, pieceSquare);
+                return game.moves.GetPieceMoves(game.player1.playerColor, pieceSquare);
         }
 
 
@@ -43,7 +47,7 @@ namespace ChessLibrary
             List<string> playerMoves = GetAllAvaibleMoves();
             if (playerMoves.Count != 0 && game.player1.playerColor == game.inGameColor)
             {
-                if (playerMoves.Exists(item => item.Contains(move)))
+                if (playerMoves.Exists(item => item == move))
                 {
                     game.player1.MakeMove(move,game.desk);
                     game.PrepareNextMove(move);
@@ -65,11 +69,15 @@ namespace ChessLibrary
 
 
         //Получить цвет который ходит в данный момент
-        public char GetInGameColor() { return game.inGameColor == Color.white ? 'w' : 'b'; }
+        public string GetInGameColor() { return game.inGameColor == Color.white ? "white" : "black"; }
 
 
         //Получить цвет игрока
-        public char GetMyColor() { return game.player1.playerColor == Color.white ? 'w' : 'b'; }
+        public string GetMyColor() { return game.player1.playerColor == Color.white ? "white" : "black"; }
+
+
+        //Получить цвет оппонета
+        public string GetOpponentColor() { return game.player2.playerColor == Color.white ? "white" : "black"; }
 
 
         //Получить фигуру по координатам доски
@@ -87,8 +95,9 @@ namespace ChessLibrary
             if(pieceSquare.Length!=2 || ((pX < 0) || (pX > 7) || (pY < 0) || (pY > 7))) return 'E'; //E-ошибка (если координаты выходят за пределы доски)
             return game.desk.GetFigureAt(pX, pY);
         }
-    
-        
+
+
+        //Получить инфу о статусе партии
         public string GameState()
         {
             if(GetAllAvaibleMoves().Count == 0)
@@ -106,6 +115,21 @@ namespace ChessLibrary
             return "GAME IN PROGRESS";
         }
 
+
+        //получить последний сделаный ход
+        public string GetLastMove()
+        {
+            if (game.moves.movesStory.Count != 0) return game.moves.movesStory.Last();
+            else return "there is no last move";
+        }
+
+
+        //получить список клеток, на которых находятся фигуры с пересчитанными(невалидными) векторами
+        public List<string> RecalculatedPieces() 
+        {
+            List<string> result = new List<string>(game.moves.RecalculatedPiecesPosition);
+            return result;
+        }
 
     }
 }

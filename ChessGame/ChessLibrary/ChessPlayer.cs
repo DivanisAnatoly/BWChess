@@ -21,17 +21,16 @@ namespace ChessLibrary
         }
 
 
-        //Просчитать доступные ходы
+        //Просчитать доступные ходы для всех фигур (исключается просчет рокировки)
         internal void CalculateMoves(Desk desk)
         {
             List<Vectors> allPlayerMoves;
             allPlayerMoves = (playerColor == Color.white) ? playersMoves.whiteMoves : playersMoves.blackMoves;
 
-            foreach (Square square in desk.deskSquares) {
-                if (square.ownedPiece != null)
-                    if (square.ownedPiece.pieceColor == playerColor)
-                        allPlayerMoves.Add(square.ownedPiece.GetPieceMoves(desk, square));
-            }
+            foreach (Square square in desk.deskSquares)
+                if (square.ownedPiece.pieceColor == playerColor)
+                    allPlayerMoves.Add(square.ownedPiece.GetPieceMoves(desk, square));
+
         }
 
 

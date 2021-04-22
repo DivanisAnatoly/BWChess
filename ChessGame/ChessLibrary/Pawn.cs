@@ -11,8 +11,8 @@ namespace ChessLibrary
         readonly int stepY;
 
 
-        internal Pawn(char key, Color pieceColor) : base(key, pieceColor)
-        {   
+        internal Pawn(PiecesKeys pieceKey, Color pieceColor) : base(pieceKey, pieceColor)
+        {
             stepY = pieceColor == Color.white ? 1 : -1;
         }
 
@@ -33,10 +33,7 @@ namespace ChessLibrary
             }
 
             //пешки ходят на два хода только со своей начальной горизонтали(2-я для белыхых, 7-я для черных)
-            if (ownSquare.y == 1 || ownSquare.y == 6)
-                CanJump = true;
-            else
-                CanJump = false;
+            CanJump = (ownSquare.y == 1 || ownSquare.y == 6);
 
             //очень сложный просчет доступных ходов 
             foreach (Square square in avaibleSquares)
@@ -45,19 +42,19 @@ namespace ChessLibrary
 
                 if (ownSquare.DeltaY(square) == stepY)
                 {
-                    if(ownSquare.AbsDeltaX(square) == 0 ) 
+                    if (ownSquare.AbsDeltaX(square) == 0)
                     {
-                        if (desk.deskSquares[square.x, square.y].ownedPiece != null) 
+                        if (desk.deskSquares[square.x, square.y].ownedPiece != Piece.nullPiece)
                         {
                             avaibleSquares[square.x, square.y] = Square.none;
                             movesVector.occupiedSquares.Add(square.Name);
                         }
                         continue;
                     }
-                    if(ownSquare.AbsDeltaX(square) == 1) 
+                    if (ownSquare.AbsDeltaX(square) == 1)
                     {
                         if (desk.notation.EnPassant == square.Name) continue;
-                        if (desk.deskSquares[square.x, square.y].ownedPiece == null || desk.deskSquares[square.x, square.y].ownedPiece.pieceColor == pieceColor)
+                        if (desk.deskSquares[square.x, square.y].ownedPiece == Piece.nullPiece || desk.deskSquares[square.x, square.y].ownedPiece.pieceColor == pieceColor)
                         {
                             avaibleSquares[square.x, square.y] = Square.none;
                             movesVector.occupiedSquares.Add(square.Name);
@@ -67,22 +64,22 @@ namespace ChessLibrary
                     avaibleSquares[square.x, square.y] = Square.none;
                     continue;
                 }
-                if (CanJump && ownSquare.AbsDeltaX(square) == 0 && ownSquare.DeltaY(square) == stepY * 2) 
+                if (CanJump && ownSquare.AbsDeltaX(square) == 0 && ownSquare.DeltaY(square) == stepY * 2)
                 {
-                    if (desk.deskSquares[square.x, square.y].ownedPiece != null) 
+                    if (desk.deskSquares[square.x, square.y].ownedPiece != Piece.nullPiece)
                     {
                         movesVector.occupiedSquares.Add(square.Name);
                         avaibleSquares[square.x, square.y] = Square.none;
                     }
                     continue;
                 }
-                
+
                 avaibleSquares[square.x, square.y] = Square.none;
             }
 
             return avaibleSquares;
         }
-   
-    
+
+
     }
 }

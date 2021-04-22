@@ -9,9 +9,9 @@ namespace ChessLibrary
     class Bot : ChessPlayer
     {
         Random random = new Random();
-        
 
-        public Bot(Color playerColor, Moves playersMoves, Desk desk) : base(playerColor, playersMoves, desk) {}
+
+        public Bot(Color playerColor, Moves playersMoves, Desk desk) : base(playerColor, playersMoves, desk) { }
 
 
         internal override void MakeMove(string move, Desk desk)

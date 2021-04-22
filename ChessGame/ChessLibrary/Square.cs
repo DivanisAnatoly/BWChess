@@ -10,12 +10,13 @@ namespace ChessLibrary
     {
         internal static Square none = new Square(-1, -1);
 
+        //координаты клетки
         internal readonly int x;
         internal readonly int y;
 
-
-        internal Piece ownedPiece { get; private set; }
-        internal string Name { get { return ((char)('a' + x)).ToString() + (y + 1).ToString(); } }
+        
+        internal Piece ownedPiece { get; private set; }   //инфа о фигуре на клетке
+        internal string Name { get { return ((char)('a' + x)).ToString() + (y + 1).ToString(); } }   //имя клетки в формате шахматной доски (a6,d3,h2 и т.д.)
 
 
         internal Square(int x, int y)

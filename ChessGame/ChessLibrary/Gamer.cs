@@ -8,14 +8,14 @@ namespace ChessLibrary
 {
     class Gamer : ChessPlayer
     {
-        public Gamer(Color playerColor, Moves playersMoves, Desk desk) : base(playerColor, playersMoves, desk) {}
+        public Gamer(Color playerColor, Moves playersMoves, Desk desk) : base(playerColor, playersMoves, desk) { }
 
 
         internal override void MakeMove(string move, Desk desk)
         {
-            desk.UpdatePiecesOnDesk(move,playerColor);
+            desk.UpdatePiecesOnDesk(move, playerColor);
         }
-    
-    
+
+
     }
 }

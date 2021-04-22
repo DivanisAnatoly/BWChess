@@ -15,21 +15,28 @@ namespace ChessLibrary
         internal ChessPlayer player1;
         internal ChessPlayer player2;
 
-        internal Color inGameColor { get; private set; } 
+        internal Color inGameColor { get; private set; }
         internal ForsythEdwardsNotation notation { get; private set; }
-        
+
 
         //Начать партию
-        internal void StartGame(string fen)
+        internal void StartGame(string fen, Color playerColor)
         {
             notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(fen);
             inGameColor = notation.InGameColor;
             moveNumber = notation.MoveNumber;
             desk = new Desk(notation);
             moves = new Moves(desk);
+            
+            if (playerColor == Color.none)
+            {
+                Random rnd = new Random();
+                Color[] colors = new Color[2] { Color.white, Color.black };
+                playerColor = colors[rnd.Next(0, 2)];
+            }
 
-            player1 = new Gamer(Color.white, moves, desk);
-            player2 = new Bot(Color.black, moves, desk);
+            player1 = new Gamer(playerColor, moves, desk);
+            player2 = new Bot(playerColor.FlipColor(), moves, desk);
             moves.UpdateMoves();
         }
 
@@ -69,7 +76,7 @@ namespace ChessLibrary
             for (int y = 7; y >= 0; y--)
             {
                 for (int x = 0; x < 8; x++)
-                    sb.Append(pieces[x, y] == null ? '1' : pieces[x, y].pieceKey);
+                    sb.Append(pieces[x, y] == Piece.nullPiece ? '1' : (char)pieces[x, y].pieceKey);
                 if (y > 0) sb.Append('/');
             }
             string eight = "11111111";
@@ -77,7 +84,7 @@ namespace ChessLibrary
                 sb.Replace(eight.Substring(0, j), j.ToString());
             return sb.ToString();
         }
-    
-    
+
+
     }
 }

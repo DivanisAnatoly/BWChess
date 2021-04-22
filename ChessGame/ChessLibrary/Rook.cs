@@ -8,7 +8,7 @@ namespace ChessLibrary
 {
     class Rook : Piece
     {
-        internal Rook(char key, Color pieceColor) : base(key, pieceColor) { }
+        internal Rook(PiecesKeys pieceKey, Color pieceColor) : base(pieceKey, pieceColor) { }
 
         internal override Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare)
         {

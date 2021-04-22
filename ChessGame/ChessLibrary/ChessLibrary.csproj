@@ -58,6 +58,7 @@
     <Compile Include="Night.cs" />
     <Compile Include="Pawn.cs" />
     <Compile Include="Piece.cs" />
+    <Compile Include="PiecesKeys.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queen.cs" />
     <Compile Include="Rook.cs" />

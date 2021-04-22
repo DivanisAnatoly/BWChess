@@ -6,16 +6,23 @@ using System.Threading.Tasks;
 
 namespace ChessLibrary
 {
-
+    using static PiecesKeys;
     abstract class Piece
     {
         protected Vectors movesVector;
 
         internal readonly Color pieceColor;
-        internal readonly char pieceKey;
+        internal readonly PiecesKeys pieceKey;
+        internal static Piece nullPiece = new NullPiece(none, Color.none);
+
+        private class NullPiece : Piece
+        {
+            internal NullPiece(PiecesKeys pieceKey, Color pieceColor) : base(pieceKey, pieceColor) { }
+            internal override Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare) => throw new NotImplementedException();
+        }
 
 
-        internal Piece(char pieceKey, Color pieceColor)
+        internal Piece(PiecesKeys pieceKey, Color pieceColor)
         {
             this.pieceKey = pieceKey;
             this.pieceColor = pieceColor;
@@ -26,7 +33,7 @@ namespace ChessLibrary
         internal Vectors GetPieceMoves(Desk desk, Square ownSquare)
         {
             Square[,] avaibleSquares = new Square[8, 8];
-            movesVector = new Vectors{startPosition = ownSquare.Name, vectorPieceKey = pieceKey };
+            movesVector = new Vectors { startPosition = ownSquare.Name, vectorPieceKey = pieceKey };
 
             for (int y = 7; y >= 0; y--)
                 for (int x = 0; x < 8; x++)
@@ -39,11 +46,11 @@ namespace ChessLibrary
                 if (sq != Square.none)
                 {
                     string sqName = sq.Name;
-                    if ((pieceKey == 'P' || pieceKey == 'p') && (sqName.Contains('1') || sqName.Contains('8')))//превращение пешки
+                    if ((pieceKey == whitePawn || pieceKey == blackPawn) && (sqName.Contains('1') || sqName.Contains('8')))//превращение пешки
                     {
                         string pawnTransfMoves = (pieceColor == Color.white)
-                            ? sqName + "Q " + sqName + "N " + sqName + "R " + sqName + "B"
-                            : sqName + "q " + sqName + "n " + sqName + "r " + sqName + "b";
+                            ? sqName + (char)whiteQueen + " " + sqName + (char)whiteKnight + " " + sqName + (char)whiteRook + " " + sqName + (char)whiteBishop
+                            : sqName + (char)blackQueen + " " + sqName + (char)blackKnight + " " + sqName + (char)blackRook + " " + sqName + (char)blackBishop;
                         movesVector.avaibleSquares.AddRange(pawnTransfMoves.Split());
                     }
                     else//обычные ходы
@@ -54,9 +61,11 @@ namespace ChessLibrary
         }
 
 
+        //обнуляет клетки недоступные фигуре для хода 
         internal abstract Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare);
 
 
+        //для ладьи и ферзя
         protected void CanMoveStraight(Square[,] avaibleSquares, Square[,] deskSquares, Square ownSquare)
         {
             foreach (Square square in avaibleSquares)
@@ -97,21 +106,21 @@ namespace ChessLibrary
         }
 
 
+        //вспомогательный метод для CanMoveStraight() и CanMoveDiagonal()
         private void CheckSquare(Square[,] avaibleSquares, Square square, int x, int y, ref bool blocked)
         {
             if (blocked) { avaibleSquares[x, y] = Square.none; return; }
-            if (square.ownedPiece != null)
+
+            if (square.ownedPiece.pieceColor == pieceColor)
             {
-                if (square.ownedPiece.pieceColor == pieceColor)
-                {
-                    avaibleSquares[x, y] = Square.none;
-                    movesVector.occupiedSquares.Add(square.Name);
-                }
-                blocked = true;
+                avaibleSquares[x, y] = Square.none;
+                movesVector.occupiedSquares.Add(square.Name);
             }
+            blocked = true;
         }
 
 
+        //для слона и ферзя
         protected void CanMoveDiagonal(Square[,] avaibleSquares, Square[,] deskSquares, Square ownSquare)
         {
             foreach (Square square in avaibleSquares)
@@ -154,7 +163,9 @@ namespace ChessLibrary
                 i++;
             }
         }
-    
-    
+
+
+
+
     }
 }

@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 
 namespace ChessLibrary
 {
+    using static PiecesKeys;
     class Moves
     {
-        public List<Vectors> whiteMoves = new List<Vectors>();
-        public List<Vectors> blackMoves = new List<Vectors>();
+        internal List<Vectors> whiteMoves = new List<Vectors>();
+        internal List<Vectors> blackMoves = new List<Vectors>();
+        internal List<string> movesStory = new List<string>();
+        internal List<string> RecalculatedPiecesPosition = new List<string>();
         private readonly Desk desk;
 
 
@@ -50,9 +53,9 @@ namespace ChessLibrary
         {
             Square ksq = desk.FindKing(kingColor); ;
             King k = (King)ksq.ownedPiece;
-            Vectors kingVector = (desk.notation.InGameColor == Color.white)
-                ? whiteMoves.Find(item => item.vectorPieceKey == 'K')
-                : blackMoves.Find(item => item.vectorPieceKey == 'k');
+            Vectors kingVector = (kingColor == Color.white)
+                ? whiteMoves.Find(item => item.vectorPieceKey == whiteKing)
+                : blackMoves.Find(item => item.vectorPieceKey == blackKing);
 
 
             if (!IsCheck())
@@ -69,85 +72,106 @@ namespace ChessLibrary
                     if (k.pieceColor == Color.white && !IsMateAfterMove("ke1d1") && !IsMateAfterMove("ke1c1")) kingVector.avaibleSquares.Add("0-0-0");
                 }
             }
-
         }
 
 
         internal void UpdateMoves(string move = "none")
         {
+            RecalculatedPiecesPosition.Clear();
             List<Vectors> activePlayerMoves;
             List<Vectors> waitingPlayerMoves;
-            List<string> result = new List<string>();
 
             Color inGameColor = desk.notation.InGameColor;
             activePlayerMoves = (inGameColor == Color.white) ? whiteMoves : blackMoves;
             waitingPlayerMoves = (inGameColor == Color.white) ? blackMoves : whiteMoves;
 
-            Vectors kingVector = inGameColor == Color.white
-                ? whiteMoves.Find(item => item.vectorPieceKey == 'K')
-                : blackMoves.Find(item => item.vectorPieceKey == 'k');
+            Vectors wKingVector = whiteMoves.Find(item => item.vectorPieceKey == whiteKing);
+            Vectors bKingVector = blackMoves.Find(item => item.vectorPieceKey == blackKing);
 
-            if (kingVector != null)
+            if (wKingVector != null)
             {
-                kingVector.avaibleSquares.Remove("0-0-0");
-                kingVector.avaibleSquares.Remove(" 0-0 ");
+                wKingVector.avaibleSquares.Remove("0-0-0");
+                wKingVector.avaibleSquares.Remove(" 0-0 ");
             }
+
+            if (bKingVector != null)
+            {
+                bKingVector.avaibleSquares.Remove("0-0-0");
+                bKingVector.avaibleSquares.Remove(" 0-0 ");
+            }
+
 
             if (move == "none")
             {
                 foreach (Vectors vector in activePlayerMoves)
-                    vector.avaibleSquares.RemoveAll(item => IsMateAfterMove(vector.vectorPieceKey + vector.startPosition + item));
+                    vector.avaibleSquares.RemoveAll(item => IsMateAfterMove((char)vector.vectorPieceKey + vector.startPosition + item));  
                 CheckCastling(inGameColor);
+                CheckCastling(inGameColor.FlipColor());
                 return;
             }
 
+
+            movesStory.Add(move);
+
+
             if (move == "0-0-0" || move == " 0-0 ")
-            {
-                string fromK, toK, fromR, toR;
-
-                if (inGameColor.FlipColor() == Color.white)
-                {
-                    fromK = "e1";
-                    if (move == "0-0-0") 
-                         { toK = "c1"; fromR = "a1"; toR = "d1"; }
-                    else { toK = "g1"; fromR = "h1"; toR = "f1"; }
-                }
-                else
-                {
-                    fromK = "e8";
-                    if (move == "0-0-0") 
-                         { toK = "c8"; fromR = "a8"; toR = "d8"; }
-                    else { toK = "g8"; fromR = "h8"; toR = "f8"; }
-                }
-
-                int indexK = waitingPlayerMoves.FindIndex(item => item.startPosition == fromK);
-                int indexR = waitingPlayerMoves.FindIndex(item => item.startPosition == fromR);
-
-                waitingPlayerMoves[indexK] = RecalculateVector(waitingPlayerMoves[indexK], toK);
-                waitingPlayerMoves[indexR] = RecalculateVector(waitingPlayerMoves[indexR], toR);
-
-                UpdateMovesLists(fromK, toK, ref activePlayerMoves, ref waitingPlayerMoves);
-                UpdateMovesLists(fromR, toR, ref activePlayerMoves, ref waitingPlayerMoves);
-            }
+                CastlingMoveUpdate(move, inGameColor, ref activePlayerMoves, ref waitingPlayerMoves);
             else
-            {
-                string from = move.Substring(1, 2);
-                string to = move.Substring(3, 2);
+                UsualMoveUpdate(move, inGameColor, ref activePlayerMoves, ref waitingPlayerMoves);
 
-                activePlayerMoves.RemoveAll(item => item.startPosition == to);
-
-                int index = waitingPlayerMoves.FindIndex(item => item.startPosition == from);
-                waitingPlayerMoves[index] = RecalculateVector(waitingPlayerMoves[index], to);
-
-                UpdateMovesLists(from, to, ref activePlayerMoves, ref waitingPlayerMoves);
-            }
 
             foreach (Vectors vector in activePlayerMoves)
-                vector.avaibleSquares.RemoveAll(item => IsMateAfterMove(vector.vectorPieceKey + vector.startPosition + item));
+                vector.avaibleSquares.RemoveAll(item => IsMateAfterMove((char)vector.vectorPieceKey + vector.startPosition + item));
             CheckCastling(inGameColor);
+            CheckCastling(inGameColor.FlipColor());
         }
 
 
+        private void UsualMoveUpdate(string move, Color inGameColor, ref List<Vectors> activePlayerMoves, ref List<Vectors> waitingPlayerMoves)
+        {
+            string from = move.Substring(1, 2);
+            string to = move.Substring(3, 2);
+
+            activePlayerMoves.RemoveAll(item => item.startPosition == to);
+
+            int index = waitingPlayerMoves.FindIndex(item => item.startPosition == from);
+            waitingPlayerMoves[index] = RecalculateVector(waitingPlayerMoves[index], to);
+
+            UpdateMovesLists(from, to, ref activePlayerMoves, ref waitingPlayerMoves);
+        }
+
+
+        private void CastlingMoveUpdate(string move, Color inGameColor, ref List<Vectors> activePlayerMoves, ref List<Vectors> waitingPlayerMoves)
+        {
+            string fromK, toK, fromR, toR;
+
+            if (inGameColor.FlipColor() == Color.white)
+            {
+                fromK = "e1";
+                if (move == "0-0-0")
+                { toK = "c1"; fromR = "a1"; toR = "d1"; }
+                else { toK = "g1"; fromR = "h1"; toR = "f1"; }
+            }
+            else
+            {
+                fromK = "e8";
+                if (move == "0-0-0")
+                { toK = "c8"; fromR = "a8"; toR = "d8"; }
+                else { toK = "g8"; fromR = "h8"; toR = "f8"; }
+            }
+
+            int indexK = waitingPlayerMoves.FindIndex(item => item.startPosition == fromK);
+            int indexR = waitingPlayerMoves.FindIndex(item => item.startPosition == fromR);
+
+            waitingPlayerMoves[indexK] = RecalculateVector(waitingPlayerMoves[indexK], toK);
+            waitingPlayerMoves[indexR] = RecalculateVector(waitingPlayerMoves[indexR], toR);
+
+            UpdateMovesLists(fromK, toK, ref activePlayerMoves, ref waitingPlayerMoves);
+            UpdateMovesLists(fromR, toR, ref activePlayerMoves, ref waitingPlayerMoves);
+        }
+
+
+        //Обновление списков векторов               
         private void UpdateMovesLists(string from, string to, ref List<Vectors> activePlayerMoves, ref List<Vectors> waitingPlayerMoves)
         {
             for (int i = 0; i < activePlayerMoves.Count; i++)
@@ -160,14 +184,17 @@ namespace ChessLibrary
         }
 
 
+        //Пересчет вектора
         private Vectors RecalculateVector(Vectors vector, string to = "none")
         {
-            if(to!="none") vector.startPosition = to;
+            RecalculatedPiecesPosition.Add(vector.startPosition);
+            if (to != "none") vector.startPosition = to;
             Square pieceSqure = desk.deskSquares[vector.StartPositionX, vector.StartPositionY];
             return pieceSqure.ownedPiece.GetPieceMoves(desk, pieceSqure);
         }
 
 
+        //Проверка на невалидность вектора
         internal bool InvalidVector(Vectors vector, string from, string to)
         {
             if (vector.occupiedSquares.Exists(item => item == from) || vector.occupiedSquares.Exists(item => item == to)
@@ -180,13 +207,20 @@ namespace ChessLibrary
         //Проверка хода на угрозу мата
         public bool IsMateAfterMove(string move)
         {
+            bool result;
             Color inGameColor = desk.notation.InGameColor;
             ForsythEdwardsNotation copyN = (ForsythEdwardsNotation)desk.notation.Clone();
             Desk copyDesk = new Desk(copyN);
             Moves copyMoves = new Moves(copyDesk);
             copyDesk.UpdatePiecesOnDesk(move, inGameColor);
             ChessPlayer op = new Bot(inGameColor.FlipColor(), copyMoves, copyDesk);
-            return copyDesk.IsKingInDanger(copyMoves.GetPlayerMoves(op.playerColor), inGameColor);
+            
+            result = copyDesk.IsKingInDanger(copyMoves.GetPlayerMoves(op.playerColor), inGameColor);
+            if (result) {
+                string movedFrom = move.Substring(1,2);
+                RecalculatedPiecesPosition.Add(movedFrom);
+            } 
+            return result;
         }
 
 
