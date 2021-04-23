@@ -2,63 +2,80 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 
 public class PieceCreator : MonoBehaviour
 {
-    // Start is called before the first frame update
-    PieceMoves pieceMoves = new PieceMoves();
-  
-    public static string fen = @"8/1p6/k1p5/8/6K1/5NP1/5p2/8";
+    static public List<string> ProbableMoves = new List<string>() { "Pa2a3", "Pb2b7" };
+    static public List<Parser> parser = new List<Parser>(PieceCreator.ProbableMoves.Count);
+    private string fen = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+    PieceMoves pieceMoves;
 
     void Start()
     {
         ShowFigures();
-       // Parser parser; //Нужекн клик мышей
-       // parser = new Parser("qd8d7");
-
+        parser = GetParseListForMoves();
+        pieceMoves = new PieceMoves();
     }
 
-    private void Update()
+    void Update()
     {
         pieceMoves.Action();
-        
     }
 
-    // Update is called once per frame
-    void ShowFigures()
+    //Разместить фигуры на доске
+    public void ShowFigures()
     {
         char figure;
+        int invertBoard = -4;
         int countCreatedFigures = 0;
+        TranformFen(out string newfen);
+        string[] linesBoard = newfen.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+        
         for (int y = 7; y >= 0; y--)
+        {
+            invertBoard++;
             for (int x = 0; x < 8; x++)
             {
-                
-                figure = GetFigureAt(x, y);
+                figure = linesBoard[y][x];
                 if (figure == '.') continue;
-                PlaceFigure(figure.ToString(), x, y);
+                PlaceFigure(figure.ToString(), x, y, invertBoard);
                 countCreatedFigures++;
-                Debug.Log(countCreatedFigures);
             }
+        }  
     }
 
-    void PlaceFigure(string figure, int x, int y)
+    //Создать клоны объекта фигуры и разместить на указанной позиции
+    void PlaceFigure(string figure, int x, int y, int invertBoard)
     {
-        Debug.Log(" " + figure + (char)(x + 'a') + (y));
-        GameObject goFigure = GameObjects.TryGetObject(figure);
-        GameObject goSquare = GameObjects.TryGetObject("" + (char)(x + 'a') + (y + 1));
-        goFigure.transform.position = goSquare.transform.position;
-        goFigure.tag = "Active";
+
+        GameObject spriteFigure = GameObject.Find(figure);
+        GameObject currentSquare = GameObject.Find("" + (char)(x + 'a') + (y + 2*invertBoard));
+        GameObject currentFigure = Instantiate(spriteFigure, currentSquare.transform.position, currentSquare.transform.rotation);
+        currentFigure.name = spriteFigure.name + currentSquare.name;
+        Debug.Log($" Создан клон фигуры {currentFigure.name[0]}");
+
+        currentFigure.tag = "Active";
     }
 
-    
-    char GetFigureAt(int x, int y)
+    //Превращение ФЕНа
+    void TranformFen(out string newfen)
     {
-        
+        newfen = fen;
         for (int j = 8; j >= 2; j--)
-            fen = fen.Replace(j.ToString(), (j - 1).ToString() + "1");
-        fen = fen.Replace("1", ".");
+            newfen = newfen.Replace(j.ToString(), (j - 1).ToString() + "1");
+        newfen = newfen.Replace("1", ".");
+        return;
+    }
 
-        string[] linesBoard = fen.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-        return linesBoard[y][x];
+    //Получение ходов из будущей библиотеки
+    static public List<Parser> GetParseListForMoves()
+    {
+        for (int i = 0; i < ProbableMoves.Count; i++)
+        {
+            parser.Add(new Parser(ProbableMoves[i]));
+        }
+        return parser;
     }
 }
