@@ -2,32 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class Board
+public class Constraints
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    Transform goFigure;
-
-    static public Transform GetItemAt(Vector3 position)
-    {
-        
-        RaycastHit2D[] figures = Physics2D.RaycastAll(position, position, 0.5f);
-        if (figures.Length == 0 || !CheckClickFigureOnBoard(figures[0].transform))
-            return null;
-        return figures[0].transform;
-    }
-
+    //Проверка, нахождение точных координат клетки после клика, если клик не на доске, то возвращает невозможную константу
     static public Vector2 CheckSquare(Vector2 clickPosition)
     {
         Vector2 newCoordsSquare = clickPosition;
@@ -40,15 +19,36 @@ public class Board
             newCoordsSquare.x = Convert.ToInt32(Math.Truncate((newCoordsSquare.x - GameObjects.LeftBottomCornerDownOnBoard().transform.position.x) / GameObjects.SquareSize()));
             newCoordsSquare.y = Convert.ToInt32(Math.Truncate((newCoordsSquare.y - GameObjects.LeftBottomCornerDownOnBoard().transform.position.y) / GameObjects.SquareSize()));
         }
-        else newCoordsSquare = new Vector2(99999, 99999);
+        else newCoordsSquare = new Vector2(9999.9f, 9999.9f);
         return newCoordsSquare;
     }
 
+    //Проверка, находится ли кликнутая фигура на доске (true/false)?
+    static public bool CheckClickFigureOnBoard(Transform figure)
+    {
+        if (figure == null) return false;
+        if (CheckSquare(figure.position).x == 9999.9f && CheckSquare(figure.position).y == 9999.9f)
+            return false;
+        return true;
+    }
+
+    //Проверка, фигура - противник (true) или союзник (false)?
+    public bool CheckEnemyFigure(Transform goFigure, GameObject item)
+    {
+        if ((goFigure.name[0] >= 'A' && goFigure.name[0] <= 'Z' && item.name[0] >= 'a' && item.name[0] <= 'z') ||
+           (goFigure.name[0] >= 'a' && goFigure.name[0] <= 'z' && item.name[0] >= 'A' && item.name[0] <= 'Z'))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    //Попытка срубить фигуру, если на клетке противник - перемещение фигуры на поле поверженных фигур
     public bool CheckTryCutFigure(GameObject goSquare, GameObject item)
     {
-        goFigure = GetItemAt(goSquare.transform.position);
+        Transform goFigure = Clicks.GetItemAt(goSquare.transform.position);
         if (!goFigure) return true;
-        GameObject fieldForDefeatFigures = GameObjects.TryGetObject("Square" + goFigure.name[0]);
+        GameObject fieldForDefeatFigures = GameObject.Find("Square" + goFigure.name[0]);
         bool checkEnemy = CheckEnemyFigure(goFigure, item);
 
         if (checkEnemy)
@@ -66,30 +66,4 @@ public class Board
         }
     }
 
-    static private bool CheckClickFigureOnBoard(Transform figure)
-    {
-        if (figure == null) return false;
-        if (CheckSquare(figure.position).x == 99999 && CheckSquare(figure.position).y == 99999)
-            return false;
-        return true;
-    }
-
-    public bool CheckEnemyFigure(Transform goFigure, GameObject item)
-    {
-        if ((goFigure.name[0] >= 'A' && goFigure.name[0] <= 'Z' && item.name[0] >= 'a' && item.name[0] <= 'z') ||
-           (goFigure.name[0] >= 'a' && goFigure.name[0] <= 'z' && item.name[0] >= 'A' && item.name[0] <= 'Z'))
-        {
-            return true;
-        }
-        return false;
-    }
-
-    public void PlaceAMSquare(GameObject goSquare, string spriteName)
-    {
-
-        GameObject Sprite = GameObjects.TryGetObject(spriteName);
-
-        goSquare.GetComponent<SpriteRenderer>().sprite = Sprite.GetComponent<SpriteRenderer>().sprite;
-
-    }
 }
