@@ -2,15 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+
 
 public class PieceMoves
 {
-    Constraints constraints = new Constraints();
-    
-    
-    TransformFigure transformFigure = new TransformFigure();
-    Square square = new Square();
+    Board board = new Board();
+    static List<string> ProbableMoves = new List<string>() { "pb2b1", "pc3c2", "ka3a2", "ka3b3", "ka3a4", "ka3b4", "Pg6f7", 
+        "Pg6g7", "Nf6g8", "Nf6g4", "Nf6h5", "Nf6h7", "Nf6d5", "Nf6d7", "Nf6e4", "Nf6e8", "Kg5f5", "Kg5h5", "Kg5h6", "Kg5h4", "Kg5g4", "Kg5f4", "Pf7f8" };
+    ChessPiece transformPawn = new ChessPiece();
     string newPawn;
 
     enum State
@@ -20,9 +19,9 @@ public class PieceMoves
         transform
     }
 
+
     State state;
     GameObject item;
-    Transform figureFromTranform;
 
     public PieceMoves()
     {
@@ -35,21 +34,20 @@ public class PieceMoves
         switch (state)
         {
             case State.none:
-                if (Clicks.IsMouseButtonPressed())
+                if (IsMouseButtonPressed())
                     PickUp();
                 break;
             case State.drop:
-                if (Clicks.IsMouseButtonPressed())
+                if (IsMouseButtonPressed())
                 {
                     Drop();
                     return false;
                 }
                 break;
             case State.transform:
-                
-                if (Clicks.IsMouseButtonPressed() && (figureFromTranform = transformFigure.GetFigureFromTransformField()))
+                if (IsMouseButtonPressed())
                 {
-                    newPawn += transformFigure.TransformPawn(item, figureFromTranform);
+                    newPawn += transformPawn.TransformPawn(item);
                     Debug.Log(newPawn);
                     state = State.none;
                     item = null;
@@ -61,43 +59,49 @@ public class PieceMoves
         return false;
     }
 
-    //Взятие фигуры по клику мыши
+    static public bool IsMouseButtonPressed()
+    {
+        return Input.GetMouseButtonDown(0);
+    }
+
     void PickUp()
     {
-        Vector2 clickPosition = Clicks.GetClickPosition();
-        Transform clickedItem = Clicks.GetItemAt(clickPosition);
+        Vector2 clickPosition = GetClickPosition();
+        Transform clickedItem = Board.GetItemAt(clickPosition);
         if (clickedItem == null) return;
-        Vector2 coordsSquare = Constraints.CheckSquare(clickPosition);   //Можно удалить, существует только ради вывода имени клетки
-        square.HighlightSquare(clickedItem.gameObject);
+        Vector2 coordsSquare = Board.CheckSquare(GetClickPosition());   //Можно удалить, существует только ради вывода имени клетки
+        HighlightSquare(clickedItem);
         item = clickedItem.gameObject;
         item.transform.localScale = new Vector3(17, 17, 0f);  //Попробовать использовать clickedItem, улучшить увеличение
         state = State.drop;
-        Debug.Log("pickedUp " + item.name);
+        Debug.Log("pickedUp " + item.name + (char)(coordsSquare.x + 'a') + (coordsSquare.y + 1));
 
     }
 
-    //По повторному клику мыши фигура падает на доску
+    static public Vector2 GetClickPosition()
+    {
+        return Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    }
+
     void Drop()
     {
-        Vector2 coordsSquare = Constraints.CheckSquare(Clicks.GetClickPosition());   //Можно удалить, существует только ради вывода имени клетки
-        Vector2 coordsItem = Constraints.CheckSquare(item.transform.position);   //А здесь использовать метод GetItemAt
-        GameObject goSquare = GameObject.Find("" + (char)(coordsSquare.x + 'a') + (coordsSquare.y + 1));
-        int check = square.ReverseColorSquare(goSquare);
+        Vector2 coordsSquare = Board.CheckSquare(GetClickPosition());   //Можно удалить, существует только ради вывода имени клетки
+        Vector2 coordsItem = Board.CheckSquare(item.transform.position);   //А здесь использовать метод GetItemAt
+        GameObject goSquare = GameObjects.TryGetObject("" + (char)(coordsSquare.x + 'a') + (coordsSquare.y + 1));
+        int check = ReverseColorSquare(goSquare);
         if (check == 1 || check == 11)
-            if (goSquare && (coordsItem != coordsSquare) && constraints.CheckTryCutFigure(goSquare, item))
+            if (goSquare && (coordsItem != coordsSquare) && board.CheckTryCutFigure(goSquare, item))
             {
                 item.transform.position = goSquare.transform.position;
-                item.name = item.name + goSquare.name;
-                Debug.Log("Drop " + item.name[0] + (char)(coordsItem.x + 'a') + "" + (coordsItem.y + 1)
+                Debug.Log("Drop " + item.name + (char)(coordsItem.x + 'a') + "" + (coordsItem.y + 1)
                               + (char)(coordsSquare.x + 'a') + (coordsSquare.y + 1));
             }
         item.transform.localScale = new Vector3(14, 14, 0f);
         if (check == 11)
         {
-            newPawn = item.name[0] + (char)(coordsItem.x + 'a') + "" + (coordsItem.y + 1)
+            newPawn = item.name + (char)(coordsItem.x + 'a') + "" + (coordsItem.y + 1)
                       + (char)(coordsSquare.x + 'a') + (coordsSquare.y + 1);
             state = State.transform;
-            Debug.Log("Кликните по нужной фигуре");
         }
         else
         {
@@ -106,17 +110,63 @@ public class PieceMoves
         }
     }
 
-    public void GenerateFigureMove(Parser chessMove) //Функция автоматического перемещения фигур
+    void HighlightSquare(Transform clickedItem)
     {
-        Constraints constraints = new Constraints();
+        List<Parser> parser = GetParseListForMoves();
 
-        if (chessMove.SquareFromMove == null || chessMove.SquareToMove == null || chessMove.Name == null ||
-             chessMove.SquareFromMove == chessMove.SquareToMove) return;
-        if (constraints.CheckTryCutFigure(chessMove.SquareToMove, chessMove.Name))  //не И, или
+        for (int i = 0; i < ProbableMoves.Count; i++)
         {
-            chessMove.Name.transform.position = chessMove.SquareToMove.transform.position;
-            Debug.Log(chessMove);
+            Transform itemToMove = Board.GetItemAt(parser[i].SquareToMove.transform.position);
+            if (Board.CheckSquare(clickedItem.position) == Board.CheckSquare(parser[i].SquareFromMove.transform.position) && 
+                clickedItem.name.ToString() == parser[i].Name.name.ToString())
+            {
+                if (itemToMove && board.CheckEnemyFigure(itemToMove, clickedItem.gameObject))
+                {
+                    board.PlaceAMSquare(parser[i].SquareToMove, "Attack");
+                    parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                }
+                else
+                parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+            }
+        
         }
+        return;
     }
 
+    int ReverseColorSquare(GameObject goSquare)
+    {
+        int check = 0;
+        List<Parser> parser = GetParseListForMoves();
+        Color colorSquare = new Color(1f, 1f, 1f, 1f);
+        for (int i = 0; i < ProbableMoves.Count; i++)
+        {
+            if (goSquare == parser[i].SquareToMove && goSquare.GetComponent<SpriteRenderer>().color == colorSquare)
+            {
+                check = 1;
+                if ((parser[i].Name.name == 'P'.ToString() && parser[i].SquareToMove.name[1] == '8') ||
+                    parser[i].Name.name == 'p'.ToString() && parser[i].SquareToMove.name[1] == '1')
+                    check = 11;
+            }
+            board.PlaceAMSquare(parser[i].SquareToMove, "Movement");
+            parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
+        }
+        return check;
+    }
+
+    List<Parser> GetParseListForMoves()
+    {
+        List<Parser> parser = new List<Parser>(ProbableMoves.Count);
+        for (int i = 0; i < ProbableMoves.Count; i++)
+        {
+            parser.Add(new Parser(ProbableMoves[i]));
+
+        }
+        return parser;
+
+    }
+
+
 }
+
+
+
