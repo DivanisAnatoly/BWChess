@@ -9,17 +9,16 @@ namespace Visualizator3000
 {
     class Program
     {
-        static Dictionary<string, List<string>> movesCash = new Dictionary<string, List<string>>();
         static ChessLibrary.GameManager gameManager = new GameManager();
         static List<char> whitePieces = new List<char>() { 'K', 'R', 'Q', 'B', 'P', 'N' };
         static List<char> blackPieces = new List<char>() { 'k', 'r', 'q', 'b', 'p', 'n' };
         static List<char> myColorPieces;
+        static List<string> pieceMovesList;
 
         static void Main(string[] args)
         {
             gameManager.StartGame(playerColor: "white");
             myColorPieces = (gameManager.GetMyColor() == "white") ? whitePieces : blackPieces;
-            InitMovesCash(movesCash);
 
             while (true)
             {
@@ -30,20 +29,8 @@ namespace Visualizator3000
 
 
                 List<string> recalculatedPieces = gameManager.RecalculatedPieces();
-                Console.Write("-Recalculated Pieces are (were) located on: ");
-                foreach (string str in recalculatedPieces)
-                    Console.Write(str + " ");
+                Console.Write("-Number of recalculated vectors : " + recalculatedPieces.Count());
 
-
-                UpdateMovesCash(recalculatedPieces);
-
-                Console.Write("\n\n-Cash with avaible moves:\n");
-                foreach (string key in movesCash.Keys)
-                {
-                    Console.Write(key + ": ");
-                    movesCash[key].ForEach(item => Console.Write(item + " "));
-                    Console.WriteLine();
-                }
 
                 string gameState = gameManager.GameState();
                 Console.WriteLine("\n\n-Game state: " + gameState);
@@ -66,7 +53,7 @@ namespace Visualizator3000
                             if (moveToSquare == "0-0-0" || moveToSquare == " 0-0 ") move = moveToSquare;
                             if (moveToSquare == "q") break;
 
-                            if (movesCash[pieceSquare].Exists(item => item == move))
+                            if (pieceMovesList.Exists(item => item == move))
                             {
                                 gameManager.PlayerMove(move);
                                 break;
@@ -82,30 +69,6 @@ namespace Visualizator3000
         }
 
 
-        private static void UpdateMovesCash(List<string> recalculatedPieces)
-        {
-            recalculatedPieces.ForEach(item => movesCash.Remove(item));
-        }
-
-
-        private static void InitMovesCash(Dictionary<string, List<string>> movesCash)
-        {
-            for (int y = 7; y >= 0; y--)
-            {
-                for (int x = 0; x < 8; x++)
-                {
-                    string square = ("" + (char)('a' + x) + (y + 1)).ToString();
-                    char piece = gameManager.GetFigureAt(square);
-                    if (myColorPieces.Exists(item => item == piece))
-                    {
-                        List<string> pieceAvaibleMoves = gameManager.GetAllAvaibleMoves(square);
-                        if (pieceAvaibleMoves.Count() != 0) movesCash.Add(square, pieceAvaibleMoves);
-                    }
-                }
-            }
-        }
-
-
         private static bool ChoosePiece(ref string pieceSquare)
         {
             pieceSquare = Console.ReadLine();
@@ -113,20 +76,12 @@ namespace Visualizator3000
                 return false;
             else
             {
-                List<string> pieceMovesList;
                 char piece = gameManager.GetFigureAt(pieceSquare);
 
-
                 if (!myColorPieces.Exists(item => item == piece)) return false;
-
-                if (movesCash.ContainsKey(pieceSquare))
-                    pieceMovesList = movesCash[pieceSquare];
-                else
-                {
-                    pieceMovesList = gameManager.GetAllAvaibleMoves(pieceSquare);
-                    if (pieceMovesList.Count == 0) return false;
-                    movesCash.Add(pieceSquare, pieceMovesList);
-                }
+                
+                pieceMovesList = gameManager.GetAllAvaibleMoves(pieceSquare);
+                if (pieceMovesList.Count == 0) return false;
 
                 Print(PrintPieceMoves(pieceSquare, pieceMovesList));
             }
