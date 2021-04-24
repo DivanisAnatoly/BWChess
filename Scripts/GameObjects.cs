@@ -31,9 +31,9 @@ static public class GameObjects
         return CornerDownOnSquare().transform.position.x - LeftBottomCornerDownOnBoard().transform.position.x;
     }
 
-    static public void ChangeNameFigure(string Square, GameObject currentFigure)
+    static public GameObject CentreSquareOnBoard()
     {
-
+        return GameObject.Find("CentreSquareOnBoard");
     }
 }
 

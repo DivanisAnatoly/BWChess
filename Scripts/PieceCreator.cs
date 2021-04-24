@@ -11,6 +11,7 @@ public class PieceCreator : MonoBehaviour
 
     void Awake()
     {
+        Debug.Log(GameObjects.CentreSquareOnBoard().transform.InverseTransformPoint(transform.position));
         ShowFigures();
     }
 
@@ -19,10 +20,9 @@ public class PieceCreator : MonoBehaviour
     {
         char figure;
         int invertBoard = -4;
-        int countCreatedFigures = 0;
         TranformFen(out string newfen);
         string[] linesBoard = newfen.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-        
+        ShowSquare();
         for (int y = 7; y >= 0; y--)
         {
             invertBoard++;
@@ -31,7 +31,6 @@ public class PieceCreator : MonoBehaviour
                 figure = linesBoard[y][x];
                 if (figure == '.') continue;
                 PlaceFigure(figure.ToString(), x, y, invertBoard);
-                countCreatedFigures++;
             }
         }  
     }
@@ -47,6 +46,26 @@ public class PieceCreator : MonoBehaviour
         Debug.Log($" Создан клон фигуры {currentFigure.name[0]}");
 
         currentFigure.tag = "Active";
+    }
+
+    void ShowSquare()
+    {
+        for (int x = 0; x < 8; x++)
+        {
+            for (int y = 0; y < 8; y++)
+            {
+                PlaceSquare(x, y);
+            }
+        }
+    }
+
+    void PlaceSquare(int x, int y)
+    {
+        GameObject board = GameObject.Find("Board");
+        GameObject instanteSquare = GameObjects.CentreSquareOnBoard();
+        Vector3 positionSquare = new Vector3(instanteSquare.transform.position.x + x * 53.62f, instanteSquare.transform.position.y + y * 53.62f, 0f);
+        GameObject currentSquare = Instantiate(instanteSquare, positionSquare, instanteSquare.transform.rotation, board.transform);
+        currentSquare.name = "" + (char)(x + 'a') + (y + 1);
     }
 
     //Превращение ФЕНа
