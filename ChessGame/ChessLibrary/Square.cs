@@ -8,47 +8,40 @@ namespace ChessLibrary
 {
     class Square
     {
-        public static Square none = new Square(-1, -1);
-        public int x { get; private set; }
-        public int y { get; private set; }
-        public Piece ownedPiece { get; private set; }
-        public string Name { get { return ((char)('a' + x)).ToString() + (y + 1).ToString(); } }
+        internal static Square none = new Square(-1, -1);
+
+        //координаты клетки
+        internal readonly int x;
+        internal readonly int y;
+
+        
+        internal Piece ownedPiece { get; private set; }   //инфа о фигуре на клетке
+        internal string Name { get { return ((char)('a' + x)).ToString() + (y + 1).ToString(); } }   //имя клетки в формате шахматной доски (a6,d3,h2 и т.д.)
 
 
-        public Square(int x, int y)
+        internal Square(int x, int y)
         {
             this.x = x;
             this.y = y;
         }
 
 
-        public static bool operator == (Square a, Square b)
-        {
-            return a.x == b.x && a.y == b.y;
-        }
+        public static bool operator ==(Square a, Square b) { return a.x == b.x && a.y == b.y; }
+        public static bool operator !=(Square a, Square b) { return !(a == b); }
 
 
-        public static bool operator != (Square a, Square b)
-        {
-            return !(a == b);
-        }
+        internal int DeltaX(Square square) { return square.x - this.x; }
+        internal int DeltaY(Square square) { return square.y - this.y; }
 
 
-        public int DeltaX(Square square) { return square.x - this.x; }
-        public int DeltaY(Square square) { return square.y - this.y; }
-
-        public int AbsDeltaX(Square square) { return Math.Abs(DeltaX(square)); } 
-        public int AbsDeltaY(Square square) { return Math.Abs(DeltaY(square)); } 
-
-        public int SignX(Square square) { return Math.Sign(DeltaX(square)); } 
-        public int SignY(Square square) { return Math.Sign(DeltaY(square)); } 
+        internal int AbsDeltaX(Square square) { return Math.Abs(DeltaX(square)); }
+        internal int AbsDeltaY(Square square) { return Math.Abs(DeltaY(square)); }
 
 
-        public void SetPieceOnSquare(Piece piece)
+        internal void SetPieceOnSquare(Piece piece)
         {
             ownedPiece = piece;
         }
-
 
     }
 }

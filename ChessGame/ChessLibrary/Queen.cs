@@ -8,11 +8,9 @@ namespace ChessLibrary
 {
     class Queen : Piece
     {
-        public Queen(char key, Color pieceColor) : base(key, pieceColor)
-        {
-        }
+        internal Queen(PiecesKeys pieceKey, Color pieceColor) : base(pieceKey, pieceColor) { }
 
-        public override Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare)
+        internal override Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare)
         {
             Square[,] avaibleSquaresS = new Square[8, 8];
             Square[,] avaibleSquaresD = new Square[8, 8];

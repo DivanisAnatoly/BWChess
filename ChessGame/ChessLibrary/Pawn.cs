@@ -8,15 +8,20 @@ namespace ChessLibrary
 {
     class Pawn : Piece
     {
-        int stepY;
-        public Pawn(char key, Color pieceColor) : base(key, pieceColor)
-        {   
+        readonly int stepY;
+
+
+        internal Pawn(PiecesKeys pieceKey, Color pieceColor) : base(pieceKey, pieceColor)
+        {
             stepY = pieceColor == Color.white ? 1 : -1;
         }
 
-        public override Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare)
+
+        internal override Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare)
         {
             bool CanJump;
+
+
             //пешки не могут ходить на 1-ой и 8-ой горизонтали (края доски)
             if (ownSquare.y < 1 || ownSquare.y > 6)
             {
@@ -28,36 +33,53 @@ namespace ChessLibrary
             }
 
             //пешки ходят на два хода только со своей начальной горизонтали(2-я для белыхых, 7-я для черных)
-            if (ownSquare.y == 1 || ownSquare.y == 6)
-                CanJump = true;
-            else
-                CanJump = false;
+            CanJump = (ownSquare.y == 1 || ownSquare.y == 6);
 
             //очень сложный просчет доступных ходов 
             foreach (Square square in avaibleSquares)
             {
-                if (square != Square.none)
+                if (square == ownSquare) { avaibleSquares[square.x, square.y] = Square.none; continue; }
+
+                if (ownSquare.DeltaY(square) == stepY)
                 {
-                    if(ownSquare.DeltaY(square) == stepY && ownSquare.AbsDeltaX(square)<=1)
+                    if (ownSquare.AbsDeltaX(square) == 0)
                     {
-                        if(ownSquare.AbsDeltaX(square) == 1 && (desk.deskSquares[square.x, square.y].ownedPiece == null && String.Compare(desk.notation.EnPassant,square.Name)!=0))
+                        if (desk.deskSquares[square.x, square.y].ownedPiece != Piece.nullPiece)
+                        {
                             avaibleSquares[square.x, square.y] = Square.none;
-                    
-                        if (ownSquare.AbsDeltaX(square) == 0 && desk.deskSquares[square.x, square.y].ownedPiece != null)
-                            avaibleSquares[square.x, square.y] = Square.none;   
+                            movesVector.occupiedSquares.Add(square.Name);
+                        }
+                        continue;
                     }
-                    else 
+                    if (ownSquare.AbsDeltaX(square) == 1)
                     {
-                        if (ownSquare.DeltaY(square) == 2 * stepY && CanJump && avaibleSquares[ownSquare.x, ownSquare.y + 1] != Square.none && ownSquare.AbsDeltaX(square) == 0 && desk.deskSquares[square.x, square.y].ownedPiece == null)
-                            continue;
-                        else
+                        if (desk.notation.EnPassant == square.Name) continue;
+                        if (desk.deskSquares[square.x, square.y].ownedPiece == Piece.nullPiece || desk.deskSquares[square.x, square.y].ownedPiece.pieceColor == pieceColor)
+                        {
                             avaibleSquares[square.x, square.y] = Square.none;
+                            movesVector.occupiedSquares.Add(square.Name);
+                        }
+                        continue;
                     }
+                    avaibleSquares[square.x, square.y] = Square.none;
+                    continue;
                 }
+                if (CanJump && ownSquare.AbsDeltaX(square) == 0 && ownSquare.DeltaY(square) == stepY * 2)
+                {
+                    if (desk.deskSquares[square.x, square.y].ownedPiece != Piece.nullPiece)
+                    {
+                        movesVector.occupiedSquares.Add(square.Name);
+                        avaibleSquares[square.x, square.y] = Square.none;
+                    }
+                    continue;
+                }
+
+                avaibleSquares[square.x, square.y] = Square.none;
             }
 
             return avaibleSquares;
-
         }
+
+
     }
 }

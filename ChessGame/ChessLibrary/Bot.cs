@@ -10,16 +10,18 @@ namespace ChessLibrary
     {
         Random random = new Random();
 
-        public Bot(Color playerColor) : base(playerColor)
-        {
-        }
+
+        public Bot(Color playerColor, Moves playersMoves, Desk desk) : base(playerColor, playersMoves, desk) { }
+
 
         internal override void MakeMove(string move, Desk desk)
         {
-            string botMove = allAvaibleMoves[random.Next(allAvaibleMoves.Count)];
-
+            List<string> moves = playersMoves.GetPlayerMoves(playerColor);
+            lastMove = moves[random.Next(moves.Count)];
             System.Threading.Thread.Sleep(2000);
-            desk.UpdatePiecesOnDesk(botMove, playerColor);
+            desk.UpdatePiecesOnDesk(lastMove, playerColor);
         }
+
+
     }
 }

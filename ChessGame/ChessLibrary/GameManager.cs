@@ -11,142 +11,81 @@ namespace ChessLibrary
     {
         Game game = new Game();
 
+
         //Начать партию(начальные условия в json строке)
-        public void StartGame(string fen = @"{ 'PiecePosition': 'rnbqkbnr/Pppppppp/8/7Q/2B5/8/PPPPPPPP/RNBQKBNR','InGameColor':'white','Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }")
+        public void StartGame(string fen = @"{ 'PiecePosition': 'rnbqk2r/Pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R','InGameColor':'white','Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }",string playerColor="none")
         {
-            game.StartGame(fen);
+            Color color = Color.none;
+            if (playerColor == "white" || playerColor == "White") color = Color.white;
+            else if (playerColor == "black" || playerColor == "Black") color = Color.black;
+
+            game.StartGame(fen,color);
         }
 
+
         //Получить ФЭН игры (json строка)
-        public string getGameFen()
+        public string GetGameFen()
         {
             game.ParseGameToFEN();
             return JsonConvert.SerializeObject(game.notation);
         }
 
+
         //Просчитать возможные ходы
-        private void GetAllMoves()
+        public List<string> GetAllAvaibleMoves(string pieceSquare="none")
         {
-            List<string> result = new List<string>();
-            King k;
-            Square ksq;
-
-            if (game.player1.playerColor == game.inGameColor)
-            {
-                game.player1.CalculateMoves(game.desk);
-                result = game.player1.allAvaibleMoves;
-            }    
+            if (pieceSquare == "none")
+                return game.moves.GetPlayerMoves(game.player1.playerColor);
             else
-            {
-                game.player2.CalculateMoves(game.desk);
-                result = game.player2.allAvaibleMoves;
-            }
-           //отсеить ходы приведущие к мату
-            ksq = game.desk.FindKing(game.inGameColor);
-            k = (King)ksq.ownedPiece;
-            result.RemoveAll(item => IsMateAfterMove(item));
-
-            //проверить возможность рокировки(добавить их в список ходов)
-            if (k.shortCastling && !IsCheck() && k.IsShortCastlingPossibleNow(game.desk.deskSquares,ksq))
-            {
-                if (k.pieceColor == Color.black && !IsMateAfterMove("ke8f8") && !IsMateAfterMove("ke8g8")) result.Add(" 0-0 ");
-                if (k.pieceColor == Color.white && !IsMateAfterMove("ke1f1") && !IsMateAfterMove("ke1g1")) result.Add(" 0-0 ");
-            }
-
-            if (k.longCastling && !IsCheck() && k.IsLongCastlingPossibleNow(game.desk.deskSquares, ksq))
-            {
-                if (k.pieceColor == Color.black && !IsMateAfterMove("ke8d8") && !IsMateAfterMove("ke8c8")) result.Add("0-0-0");
-                if (k.pieceColor == Color.white && !IsMateAfterMove("ke1d1") && !IsMateAfterMove("ke1c1")) result.Add("0-0-0");
-            }
+                return game.moves.GetPieceMoves(game.player1.playerColor, pieceSquare);
         }
 
-        //Вернуть строку с возможными ходами
-        public List<string> GetAllAvaibleMoves()
-        {
-            GetAllMoves();
-            List<string> userResult = new List<string>(); 
-            if (game.player1.playerColor == game.inGameColor)
-                userResult.AddRange(game.player1.allAvaibleMoves);
-            else
-                userResult.AddRange(game.player2.allAvaibleMoves);
-            return userResult;
-        }
-
-        //Проверка хода на угрозу мата
-        private bool IsMateAfterMove(string move) 
-        {
-            ForsythEdwardsNotation copyN = (ForsythEdwardsNotation)game.notation.Clone();
-            game.ParseGameToFEN();
-            Desk copyDesk = new Desk(copyN);
-            ChessPlayer op;
-            copyDesk.UpdatePiecesOnDesk(move, game.inGameColor);
-            op = new Bot(game.inGameColor.FlipColor());
-            op.CalculateMoves(copyDesk);
-            return copyDesk.IsKingInDanger(op.allAvaibleMoves, game.inGameColor);
-        }
-
-        //Проверка на шах
-        public bool IsCheck()
-        {
-            ForsythEdwardsNotation copyN = (ForsythEdwardsNotation)game.notation.Clone();
-            game.ParseGameToFEN();
-            Desk copyDesk = new Desk(copyN);
-            ChessPlayer op;
-            op = new Bot(game.inGameColor.FlipColor());
-            op.CalculateMoves(copyDesk);
-            return copyDesk.IsKingInDanger(op.allAvaibleMoves, game.inGameColor);
-        }
-
-        //Проверка на мат
-        public bool IsMate()
-        {
-            if(GetAllAvaibleMoves().Count==0 && IsCheck())return true;
-            return false;
-        }
-
-        //Проверка на пат
-        public bool IsPate()
-        {
-            if (GetAllAvaibleMoves().Count == 0 && !IsCheck()) return true;
-            return false;
-        }
 
         //Ход игрока
         public void PlayerMove(string move)
         {
-            GetAllMoves();
-            if (game.player1.allAvaibleMoves.Count != 0 && game.player1.playerColor == game.inGameColor)
+            List<string> playerMoves = GetAllAvaibleMoves();
+            if (playerMoves.Count != 0 && game.player1.playerColor == game.inGameColor)
             {
-                if (game.player1.allAvaibleMoves.Contains(move))
+                if (playerMoves.Exists(item => item == move))
                 {
                     game.player1.MakeMove(move,game.desk);
-                    game.PrepareNextMove();
+                    game.PrepareNextMove(move);
                 }
             }
         }
 
+
         //Ход бота
         public void BotMove()
         {
-            if (game.player2.allAvaibleMoves.Count != 0 && game.player2.playerColor == game.inGameColor)
+            List<string> opponentMoves = GetAllAvaibleMoves();
+            if (opponentMoves.Count != 0 && game.player2.playerColor == game.inGameColor)
             {
-                GetAllMoves();
-                game.player2.MakeMove("-------", game.desk);
-                game.PrepareNextMove();
+                game.player2.MakeMove("", game.desk);
+                game.PrepareNextMove(game.player2.lastMove);
             }
         }
 
+
         //Получить цвет который ходит в данный момент
-        public char GetInGameColor() { return game.inGameColor == Color.white ? 'w' : 'b'; }
+        public string GetInGameColor() { return game.inGameColor == Color.white ? "white" : "black"; }
+
 
         //Получить цвет игрока
-        public char GetMyColor() { return game.player1.playerColor == Color.white ? 'w' : 'b'; }
+        public string GetMyColor() { return game.player1.playerColor == Color.white ? "white" : "black"; }
+
+
+        //Получить цвет оппонета
+        public string GetOpponentColor() { return game.player2.playerColor == Color.white ? "white" : "black"; }
+
 
         //Получить фигуру по координатам доски
         public char GetFigureAt(int x, int y) {
             if ((x < 0) || (x > 7) || (y < 0) || (y > 7)) return 'E'; //E-ошибка (если координаты выходят за пределы доски)
             return game.desk.GetFigureAt(x, y); 
         }
+
 
         public char GetFigureAt(string pieceSquare)
         {
@@ -156,5 +95,41 @@ namespace ChessLibrary
             if(pieceSquare.Length!=2 || ((pX < 0) || (pX > 7) || (pY < 0) || (pY > 7))) return 'E'; //E-ошибка (если координаты выходят за пределы доски)
             return game.desk.GetFigureAt(pX, pY);
         }
+
+
+        //Получить инфу о статусе партии
+        public string GameState()
+        {
+            if(GetAllAvaibleMoves().Count == 0)
+            {
+                if (game.moves.IsPate()) return "PATE";
+                if (game.moves.IsMate())
+                {
+                    if (game.inGameColor == game.player1.playerColor)
+                        return "MATE\nYOU LOSE!";
+                    else
+                        return "MATE\nYOU WIN!";
+                }
+            }
+            if(game.moves.IsCheck()) return "CHECK";
+            return "GAME IN PROGRESS";
+        }
+
+
+        //получить последний сделаный ход
+        public string GetLastMove()
+        {
+            if (game.moves.movesStory.Count != 0) return game.moves.movesStory.Last();
+            else return "there is no last move";
+        }
+
+
+        //получить список клеток, на которых находятся фигуры с пересчитанными(невалидными) векторами
+        public List<string> RecalculatedPieces() 
+        {
+            List<string> result = new List<string>(game.moves.RecalculatedPiecesPosition);
+            return result;
+        }
+
     }
 }

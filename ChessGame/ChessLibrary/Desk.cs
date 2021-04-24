@@ -6,22 +6,22 @@ using System.Threading.Tasks;
 
 namespace ChessLibrary
 {
+    using static PiecesKeys;
     class Desk
     {
-        public ForsythEdwardsNotation notation;
-        public Piece[,] pieces;
-        public List<Piece> deadPieces;
-        public Square[,] deskSquares;
+        internal ForsythEdwardsNotation notation;
+        internal Piece[,] pieces = new Piece[8, 8];
+        internal List<Piece> deadPieces = new List<Piece>();
+        internal Square[,] deskSquares = new Square[8, 8];
+
 
         //Создать доску
-        public Desk(ForsythEdwardsNotation notation)
+        internal Desk(ForsythEdwardsNotation notation)
         {
             this.notation = notation;
-            pieces = new Piece[8, 8];
-            deskSquares = new Square[8, 8];
-            deadPieces = new List<Piece>();
             SetPiecesOnDesk(this.notation.PiecePosition);
         }
+
 
         //Заполнить массив фигур
         private void SetPiecesOnDesk(string data)
@@ -32,9 +32,10 @@ namespace ChessLibrary
             string[] lines = data.Split('/');
             for (int y = 7; y >= 0; y--)
                 for (int x = 0; x < 8; x++)
-                    pieces[x, y] = lines[7 - y][x] == '.' ? null : ParseToPiece(lines[7 - y][x]);
+                    pieces[x, y] = lines[7 - y][x] == '.' ? Piece.nullPiece : ParseToPiece(lines[7 - y][x]);
             FillDeskSquares();
         }
+
 
         //Обновить инф. о положении фигур на доске (массивы фигур,клеток и взятых фигур)
         internal void UpdatePiecesOnDesk(string move, Color inGameColor)
@@ -42,106 +43,119 @@ namespace ChessLibrary
             Square kingSq = FindKing(inGameColor);
             King k = (King)kingSq.ownedPiece;
 
-            if (String.Compare(move," 0-0 ")!=0 && String.Compare(move, "0-0-0") != 0)
+            if (move != " 0-0 " && move != "0-0-0")
             {
-                int fromX = move[1] - 'a';  int fromY = move[2] - '1';
-                int toX = move[3] - 'a';    int toY = move[4] - '1';
+                int fromX = move[1] - 'a'; int fromY = move[2] - '1';
+                int toX = move[3] - 'a'; int toY = move[4] - '1';
 
-                //cохр.съеденные фигуры
-                if (pieces[toX, toY] != null)
+                //cохр.съеденную фигуру
+                if (pieces[toX, toY] != Piece.nullPiece)
                     deadPieces.Add(pieces[toX, toY]);
 
-                pieces[toX, toY] = null;
+                //перемещение фигуры
                 pieces[toX, toY] = pieces[fromX, fromY];
-                pieces[fromX, fromY] = null;
+                pieces[fromX, fromY] = Piece.nullPiece;
 
                 //взятие на проходе
-                if (String.Compare(notation.EnPassant, deskSquares[toX, toY].Name) == 0) {
-                    pieces[toX, fromY] = null;
-                }
+                if ((move[0] == (char)blackPawn || move[0] == (char)whitePawn) && notation.EnPassant == deskSquares[toX, toY].Name) pieces[toX, fromY] = Piece.nullPiece;
+
                 //определяем был ли совершен ход пешкой на две клетки
-                if (Math.Abs(toY - fromY) == 2 && (move[0] == 'p' || move[0] == 'P'))
-                    notation.EnPassant = deskSquares[(toX+fromX)/2, (toY + fromY)/2].Name;
+                if (Math.Abs(toY - fromY) == 2 && (move[0] == (char)blackPawn || move[0] == (char)whitePawn))
+                    notation.EnPassant = deskSquares[(toX + fromX) / 2, (toY + fromY) / 2].Name;
                 else
                     notation.EnPassant = "-";
+
                 //превращение пешки (Pe7e8N,Pa7b8Q и т.д.). Превращение фиксируется на 6-ом знаке(если оно есть)
                 if (move.Length == 6) pieces[toX, toY] = ParseToPiece(move[5]);
-                //обнуляем рокировки при ходе короля
-                if ((k.shortCastling || k.longCastling) && move[0]== k.key) { k.shortCastling = false; k.longCastling = false; }
+
+                //право рокировки навсегда теряется при ходе короля
+                if ((k.shortCastling || k.longCastling) && move[0] == (char)k.pieceKey) { k.shortCastling = false; k.longCastling = false; }
+
+                //право рокировки с ладьей навсегда теряется при ходе этой ладьи или ее взятии
+                if (k.shortCastling && k.pieceKey == whiteKing && pieces[7, 0].pieceKey != whiteRook) { k.shortCastling = false; }
+                if (k.longCastling && k.pieceKey == whiteKing && pieces[0, 0].pieceKey != whiteRook) { k.longCastling = false; }
+                if (k.shortCastling && k.pieceKey == blackKing && pieces[7, 7].pieceKey != blackRook) { k.shortCastling = false; }
+                if (k.longCastling && k.pieceKey == blackKing && pieces[0, 7].pieceKey != blackRook) { k.longCastling = false; }
 
             }
-            else //рокировка (всегда происходит на конкретных клетках, поэтому там присутствуют magic numbers)
+            else
             {
-                if (String.Compare(move, " 0-0 ") == 0 && inGameColor == Color.white) {
-                    pieces[6, 0] = pieces[4, 0]; pieces[4, 0] = null;
-                    pieces[5, 0] = pieces[7, 0]; pieces[7, 0] = null;
-                }
-                if (String.Compare(move, "0-0-0") == 0 && inGameColor == Color.white) {
-                    pieces[2, 0] = pieces[4, 0]; pieces[4, 0] = null;
-                    pieces[3, 0] = pieces[0, 0]; pieces[0, 0] = null;
-                }
-                if (String.Compare(move, " 0-0 ") == 0 && inGameColor == Color.black) {
-                    pieces[6, 7] = pieces[4, 7]; pieces[4, 7] = null;
-                    pieces[5, 7] = pieces[7, 7]; pieces[7, 7] = null;
-                }
-                if (String.Compare(move, "0-0-0") == 0 && inGameColor == Color.black) {
-                    pieces[2, 7] = pieces[4, 7]; pieces[4, 7] = null;
-                    pieces[3, 7] = pieces[0, 7]; pieces[0, 7] = null;
-                }
-                k.shortCastling = false; k.longCastling = false;
+                MakeCastling(k, move);
             }
-            //право рокировки с ладьей навсегда теряется при ходе этой ладьи
-            if(k.shortCastling && inGameColor==Color.white && (pieces[7, 0] == null || pieces[7,0].key!='R')) { k.shortCastling = false;} 
-            if(k.longCastling && inGameColor==Color.white && (pieces[0, 0] == null || pieces[0,0].key!='R')) { k.longCastling = false; } 
-            if(k.shortCastling && inGameColor==Color.black && (pieces[7, 7] == null || pieces[7,7].key!='r')) { k.shortCastling = false; } 
-            if(k.longCastling && inGameColor==Color.black && (pieces[0, 7] == null || pieces[0,7].key!='r')) { k.longCastling = false; } 
 
             UpdateDeskSquares();
         }
+
+
+        //рокировка (всегда происходит на конкретных клетках, поэтому там присутствуют magic numbers)
+        private void MakeCastling(King k, string move)
+        {
+            if (move == " 0-0 " && k.pieceKey == whiteKing)
+            {
+                pieces[6, 0] = pieces[4, 0]; pieces[4, 0] = Piece.nullPiece;
+                pieces[5, 0] = pieces[7, 0]; pieces[7, 0] = Piece.nullPiece;
+            }
+            if (move == "0-0-0" && k.pieceKey == whiteKing)
+            {
+                pieces[2, 0] = pieces[4, 0]; pieces[4, 0] = Piece.nullPiece;
+                pieces[3, 0] = pieces[0, 0]; pieces[0, 0] = Piece.nullPiece;
+            }
+            if (move == " 0-0 " && k.pieceKey == blackKing)
+            {
+                pieces[6, 7] = pieces[4, 7]; pieces[4, 7] = Piece.nullPiece;
+                pieces[5, 7] = pieces[7, 7]; pieces[7, 7] = Piece.nullPiece;
+            }
+            if (move == "0-0-0" && k.pieceKey == blackKing)
+            {
+                pieces[2, 7] = pieces[4, 7]; pieces[4, 7] = Piece.nullPiece;
+                pieces[3, 7] = pieces[0, 7]; pieces[0, 7] = Piece.nullPiece;
+            }
+            k.shortCastling = false; k.longCastling = false;
+        }
+
 
         //Возвращает объект фигуры в зависимости от поступающего ключа
         private Piece ParseToPiece(char key)
         {
             switch (key)
             {
-                case 'K':
-                    return new King(key, Color.white, notation.Castling);
-                case 'k':
-                    return new King(key, Color.black, notation.Castling);
-                case 'P':
-                    return new Pawn(key, Color.white);
-                case 'p':
-                    return new Pawn(key, Color.black);
-                case 'N':
-                    return new Night(key, Color.white);
-                case 'n':
-                    return new Night(key, Color.black);
-                case 'B':
-                    return new Bishop(key, Color.white);
-                case 'b':
-                    return new Bishop(key, Color.black);
-                case 'R':
-                    return new Rook(key, Color.white);
-                case 'r':
-                    return new Rook(key, Color.black);
-                case 'Q':
-                    return new Queen(key, Color.white);
-                case 'q':
-                    return new Queen(key, Color.black);
+                case (char)whiteKing:
+                    return new King(whiteKing, Color.white, notation.Castling);
+                case (char)blackKing:
+                    return new King(blackKing, Color.black, notation.Castling);
+                case (char)whitePawn:
+                    return new Pawn(whitePawn, Color.white);
+                case (char)blackPawn:
+                    return new Pawn(blackPawn, Color.black);
+                case (char)whiteKnight:
+                    return new Night(whiteKnight, Color.white);
+                case (char)blackKnight:
+                    return new Night(blackKnight, Color.black);
+                case (char)whiteBishop:
+                    return new Bishop(whiteBishop, Color.white);
+                case (char)blackBishop:
+                    return new Bishop(blackBishop, Color.black);
+                case (char)whiteRook:
+                    return new Rook(whiteRook, Color.white);
+                case (char)blackRook:
+                    return new Rook(blackRook, Color.black);
+                case (char)whiteQueen:
+                    return new Queen(whiteQueen, Color.white);
+                case (char)blackQueen:
+                    return new Queen(blackQueen, Color.black);
 
-                default: return null;
+                default: return Piece.nullPiece;
 
             }
         }
 
+
         //Получить фигуру по координатам доски
-        public char GetFigureAt(int x, int y)
+        internal char GetFigureAt(int x, int y)
         {
-            if (pieces[x, y]!=null)
-                return pieces[x, y].key;
-            else
-                return '.';
+            return (char)pieces[x, y].pieceKey;
         }
+
 
         //Инициализация массива клеток
         private void FillDeskSquares()
@@ -152,6 +166,7 @@ namespace ChessLibrary
             UpdateDeskSquares();
         }
 
+
         //Поставить фигуры на клетки
         private void UpdateDeskSquares()
         {
@@ -160,26 +175,29 @@ namespace ChessLibrary
                     deskSquares[x, y].SetPieceOnSquare(pieces[x, y]);
         }
 
+
         //Проверяет нахождение короля под ударом врага
         internal bool IsKingInDanger(List<string> opTurnList, Color inGameColor)
         {
             Square kingSquare = FindKing(inGameColor);
-            foreach(string opTurn in opTurnList)
+            foreach (string opTurn in opTurnList)
             {
-                if (String.Compare(kingSquare.Name, opTurn.Substring(3, 2)) == 0)
+                if (kingSquare.Name == opTurn.Substring(3, 2))
                     return true;
             }
             return false;
         }
 
+
         //Получить клетку на которой стоит король
-        public Square FindKing(Color inGameColor)
+        internal Square FindKing(Color inGameColor)
         {
-            char kingKey = inGameColor == Color.black ? 'k' : 'K';
+            PiecesKeys kingKey = inGameColor == Color.black ? blackKing : whiteKing;
             foreach (Square square in deskSquares)
-                if (square.ownedPiece!=null && square.ownedPiece.key == kingKey)
-                    return square;
+                if (square.ownedPiece.pieceKey == kingKey) return square;
             return Square.none;
         }
+
+
     }
 }

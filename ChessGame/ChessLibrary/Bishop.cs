@@ -8,14 +8,15 @@ namespace ChessLibrary
 {
     class Bishop : Piece
     {
-        public Bishop(char key, Color pieceColor) : base(key, pieceColor)
-        {
-        }
+        internal Bishop(PiecesKeys pieceKey, Color pieceColor) : base(pieceKey, pieceColor) { }
 
-        public override Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare)
+
+        internal override Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare)
         {
             CanMoveDiagonal(avaibleSquares, desk.deskSquares, ownSquare);
             return avaibleSquares;
         }
+
+
     }
 }

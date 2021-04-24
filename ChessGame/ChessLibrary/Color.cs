@@ -15,6 +15,7 @@ namespace ChessLibrary
         black
     }
 
+
     static class ColorMethods
     {
         public static Color FlipColor(this Color color)
