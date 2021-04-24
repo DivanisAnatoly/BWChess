@@ -6,28 +6,24 @@ using UnityEngine.SceneManagement;
 
 public class PieceMoves
 {
-    Constraints constraints = new Constraints();
-    
-    
-    TransformFigure transformFigure = new TransformFigure();
-    Square square = new Square();
-    string newPawn;
+    private Constraints constraints;  //Ограничения области клика
+    private TransformFigure transformFigure;  //Превращение пешки
 
-    enum State
+    List<Parser> parser;  //Список распарсенных ходов
+
+    private Square square = new Square(); //Подсветка клеток
+    private string newPawn;  //Вывод превращения пешки
+
+    private State state;  //Состояние фигуры
+    private GameObject currentFigure; //Кликнутая фигура
+
+    public PieceMoves(List<Parser> parser)
     {
-        none,
-        drop,
-        transform
-    }
-
-    State state;
-    GameObject item;
-    Transform figureFromTranform;
-
-    public PieceMoves()
-    {
+        constraints = new Constraints();
+        transformFigure = new TransformFigure();
+        this.parser = parser;
         state = State.none;
-        item = null;
+        currentFigure = null;
     }
 
     public bool Action()
@@ -42,21 +38,17 @@ public class PieceMoves
                 if (Clicks.IsMouseButtonPressed())
                 {
                     Drop();
-                    return false;
                 }
                 break;
             case State.transform:
-                
-                if (Clicks.IsMouseButtonPressed() && (figureFromTranform = transformFigure.GetFigureFromTransformField()))
+                if (Clicks.IsMouseButtonPressed() && transformFigure.GetFigureFromTransformField(currentFigure, out string nameTransformFigure))
                 {
-                    newPawn += transformFigure.TransformPawn(item, figureFromTranform);
+                    newPawn += nameTransformFigure;
                     Debug.Log(newPawn);
                     state = State.none;
-                    item = null;
-                    return false;
+                    currentFigure = null;
                 }
                 break;
-
         }
         return false;
     }
@@ -67,34 +59,34 @@ public class PieceMoves
         Vector2 clickPosition = Clicks.GetClickPosition();
         Transform clickedItem = Clicks.GetItemAt(clickPosition);
         if (clickedItem == null) return;
-        Vector2 coordsSquare = Constraints.CheckSquare(clickPosition);   //Можно удалить, существует только ради вывода имени клетки
-        square.HighlightSquare(clickedItem.gameObject);
-        item = clickedItem.gameObject;
-        item.transform.localScale = new Vector3(17, 17, 0f);  //Попробовать использовать clickedItem, улучшить увеличение
+        Vector2 coordsSquare = constraints.CheckSquare(clickPosition);   //Можно удалить, существует только ради вывода имени клетки
+        square.HighlightSquare(clickedItem.gameObject, parser);
+        currentFigure = clickedItem.gameObject;
+        currentFigure.transform.localScale = new Vector3(17, 17, 0f);  //Попробовать использовать clickedItem, улучшить увеличение
         state = State.drop;
-        Debug.Log("pickedUp " + item.name);
+        Debug.Log("pickedUp " + currentFigure.name);
 
     }
 
     //По повторному клику мыши фигура падает на доску
     void Drop()
     {
-        Vector2 coordsSquare = Constraints.CheckSquare(Clicks.GetClickPosition());   //Можно удалить, существует только ради вывода имени клетки
-        Vector2 coordsItem = Constraints.CheckSquare(item.transform.position);   //А здесь использовать метод GetItemAt
+        Vector2 coordsSquare = constraints.CheckSquare(Clicks.GetClickPosition());   //Можно удалить, существует только ради вывода имени клетки
+        Vector2 coordsItem = constraints.CheckSquare(currentFigure.transform.position);   //А здесь использовать метод GetItemAt
         GameObject goSquare = GameObject.Find("" + (char)(coordsSquare.x + 'a') + (coordsSquare.y + 1));
-        int check = square.ReverseColorSquare(goSquare);
+        int check = square.ReverseColorSquare(goSquare, parser);
         if (check == 1 || check == 11)
-            if (goSquare && (coordsItem != coordsSquare) && constraints.CheckTryCutFigure(goSquare, item))
+            if (goSquare && (coordsItem != coordsSquare) && constraints.CheckTryCutFigure(goSquare, currentFigure))
             {
-                item.transform.position = goSquare.transform.position;
-                item.name = item.name + goSquare.name;
-                Debug.Log("Drop " + item.name[0] + (char)(coordsItem.x + 'a') + "" + (coordsItem.y + 1)
+                currentFigure.transform.position = goSquare.transform.position;
+                currentFigure.name = currentFigure.name + goSquare.name;
+                Debug.Log("Drop " + currentFigure.name[0] + (char)(coordsItem.x + 'a') + "" + (coordsItem.y + 1)
                               + (char)(coordsSquare.x + 'a') + (coordsSquare.y + 1));
             }
-        item.transform.localScale = new Vector3(14, 14, 0f);
+        currentFigure.transform.localScale = new Vector3(14, 14, 0f);
         if (check == 11)
         {
-            newPawn = item.name[0] + (char)(coordsItem.x + 'a') + "" + (coordsItem.y + 1)
+            newPawn = currentFigure.name[0] + (char)(coordsItem.x + 'a') + "" + (coordsItem.y + 1)
                       + (char)(coordsSquare.x + 'a') + (coordsSquare.y + 1);
             state = State.transform;
             Debug.Log("Кликните по нужной фигуре");
@@ -102,14 +94,15 @@ public class PieceMoves
         else
         {
             state = State.none;
-            item = null;
+            currentFigure = null;
         }
     }
 
-    public void GenerateFigureMove(Parser chessMove) //Функция автоматического перемещения фигур
+    //Функция автоматического перемещения фигур
+    public void GenerateFigureMove(Parser chessMove) 
     {
         Constraints constraints = new Constraints();
-
+        Debug.Log(chessMove.Name.name);
         if (chessMove.SquareFromMove == null || chessMove.SquareToMove == null || chessMove.Name == null ||
              chessMove.SquareFromMove == chessMove.SquareToMove) return;
         if (constraints.CheckTryCutFigure(chessMove.SquareToMove, chessMove.Name))  //не И, или

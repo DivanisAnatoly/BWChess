@@ -7,21 +7,11 @@ using UnityEngine.SceneManagement;
 
 public class PieceCreator : MonoBehaviour
 {
-    static public List<string> ProbableMoves = new List<string>() { "Pa2a3", "Pb2b7" };
-    static public List<Parser> parser = new List<Parser>(PieceCreator.ProbableMoves.Count);
     private string fen = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-    PieceMoves pieceMoves;
 
-    void Start()
+    void Awake()
     {
         ShowFigures();
-        parser = GetParseListForMoves();
-        pieceMoves = new PieceMoves();
-    }
-
-    void Update()
-    {
-        pieceMoves.Action();
     }
 
     //Разместить фигуры на доске
@@ -69,13 +59,4 @@ public class PieceCreator : MonoBehaviour
         return;
     }
 
-    //Получение ходов из будущей библиотеки
-    static public List<Parser> GetParseListForMoves()
-    {
-        for (int i = 0; i < ProbableMoves.Count; i++)
-        {
-            parser.Add(new Parser(ProbableMoves[i]));
-        }
-        return parser;
-    }
 }

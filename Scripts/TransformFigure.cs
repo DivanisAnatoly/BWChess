@@ -4,6 +4,19 @@ using UnityEngine;
 
 public class TransformFigure
 {
+    //Получить фигуру из окна возможных фигур
+    public bool GetFigureFromTransformField(GameObject pawnFigure, out string nameTransformFigure)
+    {
+        Vector2 clickPosition = Clicks.GetClickPosition();
+        RaycastHit2D[] figures = Physics2D.RaycastAll(clickPosition, clickPosition, 0.5f);
+        if (figures.Length != 0 && figures[0].transform.gameObject.tag == "Static")
+        {
+            nameTransformFigure = TransformPawn(pawnFigure, figures[0].transform);
+            return true;
+        }
+        nameTransformFigure = null;
+        return false;
+    }
 
     public string TransformPawn(GameObject pawn, Transform figureFromTransformField)
     {
@@ -21,14 +34,5 @@ public class TransformFigure
 
     }
 
-    public Transform GetFigureFromTransformField()
-    {
-        Vector2 clickPosition = Clicks.GetClickPosition();
-        RaycastHit2D[] figures = Physics2D.RaycastAll(clickPosition, clickPosition, 0.5f);
-        if (figures.Length != 0 && figures[0].transform.gameObject.tag == "Static")
-        {
-            return figures[0].transform;
-        }
-        return null;
-    }
+    
 }

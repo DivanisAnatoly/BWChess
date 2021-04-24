@@ -7,8 +7,9 @@ static public class Clicks
     //Получение фигуры по клику с помощью пускания лучей с точки клика
     static public Transform GetItemAt(Vector3 position)
     {
+        Constraints constraints = new Constraints();
         RaycastHit2D[] figures = Physics2D.RaycastAll(position, position, 0.5f);
-        if (figures.Length == 0 || !Constraints.CheckClickFigureOnBoard(figures[0].transform))
+        if (figures.Length == 0 || !constraints.CheckClickFigureOnBoard(figures[0].transform))
             return null;
         return figures[0].transform;
     }

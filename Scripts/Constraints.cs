@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class Constraints
 {
     //Проверка, нахождение точных координат клетки после клика, если клик не на доске, то возвращает невозможную константу
-    static public Vector2 CheckSquare(Vector2 clickPosition)
+    public Vector2 CheckSquare(Vector2 clickPosition)
     {
         Vector2 newCoordsSquare = clickPosition;
 
@@ -24,7 +24,7 @@ public class Constraints
     }
 
     //Проверка, находится ли кликнутая фигура на доске (true/false)?
-    static public bool CheckClickFigureOnBoard(Transform figure)
+    public bool CheckClickFigureOnBoard(Transform figure)
     {
         if (figure == null) return false;
         if (CheckSquare(figure.position).x == 9999.9f && CheckSquare(figure.position).y == 9999.9f)
@@ -65,5 +65,4 @@ public class Constraints
             return false;
         }
     }
-
 }
