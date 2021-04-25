@@ -9,19 +9,19 @@ public class Square
     public void HighlightSquare(GameObject clickedItem, List<Parser> parser)
     {
         Constraints constraints = new Constraints();
-        for (int i = 0; i < parser.Count; i++)
+        foreach (Parser i in parser)
         {
-            Transform itemToMove = Clicks.GetItemAt(parser[i].SquareToMove.transform.position);
-            if (constraints.CheckSquare(clickedItem.transform.position) == constraints.CheckSquare(parser[i].SquareFromMove.transform.position) &&
-                clickedItem.name == parser[i].Name.name)
+            Transform itemToMove = Clicks.GetItemAt(i.SquareToMove.transform.position);
+            if (constraints.CheckSquare(clickedItem.transform.position) == constraints.CheckSquare(i.SquareFromMove.transform.position) &&
+                clickedItem.name == i.Name.name)
             {
                 if (itemToMove && constraints.CheckEnemyFigure(itemToMove, clickedItem))
                 {
-                    PlaceAMSquare(parser[i].SquareToMove, "Attack");
-                    parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                    PlaceAMSquare(i.SquareToMove, "Attack");
+                    i.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
                 }
                 else
-                    parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                    i.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
             }
 
         }
@@ -29,23 +29,33 @@ public class Square
     }
 
     //Изменение цвета клетки
-    public int ReverseColorSquare(GameObject goSquare, List<Parser> parser)
+    public void ReverseColorSquare(GameObject goSquare, List<Parser> parser, out TypesOfMove typeMove)
     {
-        int check = 0;
+        typeMove = TypesOfMove.Null;
         Color colorSquare = new Color(1f, 1f, 1f, 1f);
         for (int i = 0; i < parser.Count; i++)
         {
+            Debug.Log("" + parser[i].Name.name + "" + parser[i].SquareToMove.name);
             if (goSquare == parser[i].SquareToMove && goSquare.GetComponent<SpriteRenderer>().color == colorSquare)
             {
-                check = 1;
+
+                typeMove = TypesOfMove.Normal;
                 if ((parser[i].Name.name[0] == 'P' && parser[i].SquareToMove.name[1] == '8') ||
                     parser[i].Name.name[0] == 'p' && parser[i].SquareToMove.name[1] == '1')
-                    check = 11;
+                    typeMove = TypesOfMove.Transform;
+                else if (parser[i].Name.name == "Ke1" && parser[i].SquareToMove.name == "g1")
+                {
+                    typeMove = TypesOfMove.SCastling;
+                }
+                else if (parser[i].Name.name == "Ke1" && parser[i].SquareToMove.name == "c1")
+                {
+                    typeMove = TypesOfMove.LCastling;
+                }
             }
             PlaceAMSquare(parser[i].SquareToMove, "Movement");
             parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
         }
-        return check;
+        return;
     }
 
     //Меняет спрайт указанной клетки на указанный спрайт, обычно используется для замены Attack/Movement спрайта

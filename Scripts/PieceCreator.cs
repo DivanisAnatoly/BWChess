@@ -7,11 +7,10 @@ using UnityEngine.SceneManagement;
 
 public class PieceCreator : MonoBehaviour
 {
-    private string fen = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+    private string fen = @"r111k11r/pppppppp/8/8/8/8/PPPPPPPP/R111K11R";
 
     void Awake()
     {
-        Debug.Log(GameObjects.CentreSquareOnBoard().transform.InverseTransformPoint(transform.position));
         ShowFigures();
     }
 

@@ -61,7 +61,6 @@ public class Constraints
         }
         else
         {
-            Debug.Log(goFigure.name);
             return false;
         }
     }

@@ -34,5 +34,13 @@ public class TransformFigure
 
     }
 
-    
+    public Vector3 IncreaseFigure(Vector3 localScale)
+    {
+        return new Vector3(localScale.x + 3, localScale.y + 3, 0f);
+    }
+
+    public Vector3 DecreaseFigure(Vector3 localScale)
+    {
+        return new Vector3(localScale.x - 3, localScale.y - 3, 0f);
+    }
 }
