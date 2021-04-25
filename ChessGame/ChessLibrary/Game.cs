@@ -17,6 +17,8 @@ namespace ChessLibrary
 
         internal Color inGameColor { get; private set; }
         internal ForsythEdwardsNotation notation { get; private set; }
+        
+        Random rnd = new Random();
 
 
         //Начать партию
@@ -30,7 +32,6 @@ namespace ChessLibrary
             
             if (playerColor == Color.none)
             {
-                Random rnd = new Random();
                 Color[] colors = new Color[2] { Color.white, Color.black };
                 playerColor = colors[rnd.Next(0, 2)];
             }

@@ -30,7 +30,6 @@ namespace ChessLibrary
             foreach (Square square in desk.deskSquares)
                 if (square.ownedPiece.pieceColor == playerColor)
                     allPlayerMoves.Add(square.ownedPiece.GetPieceMoves(desk, square));
-
         }
 
 

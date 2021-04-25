@@ -18,7 +18,7 @@ namespace ChessLibrary
         {
             List<string> moves = playersMoves.GetPlayerMoves(playerColor);
             lastMove = moves[random.Next(moves.Count)];
-            System.Threading.Thread.Sleep(2000);
+            //System.Threading.Thread.Sleep(2000);
             desk.UpdatePiecesOnDesk(lastMove, playerColor);
         }
 

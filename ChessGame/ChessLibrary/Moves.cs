@@ -13,6 +13,7 @@ namespace ChessLibrary
         internal List<Vectors> blackMoves = new List<Vectors>();
         internal List<string> movesStory = new List<string>();
         internal List<string> RecalculatedPiecesPosition = new List<string>();
+        internal List<string> KingGuardsPiecesPosition = new List<string>();
         private readonly Desk desk;
 
 
@@ -78,6 +79,7 @@ namespace ChessLibrary
         internal void UpdateMoves(string move = "none")
         {
             RecalculatedPiecesPosition.Clear();
+
             List<Vectors> activePlayerMoves;
             List<Vectors> waitingPlayerMoves;
 
@@ -104,7 +106,7 @@ namespace ChessLibrary
             if (move == "none")
             {
                 foreach (Vectors vector in activePlayerMoves)
-                    vector.avaibleSquares.RemoveAll(item => IsMateAfterMove((char)vector.vectorPieceKey + vector.startPosition + item));  
+                    vector.avaibleSquares.RemoveAll(item => IsMateAfterMove((char)vector.vectorPieceKey + vector.startPosition + item));
                 CheckCastling(inGameColor);
                 CheckCastling(inGameColor.FlipColor());
                 return;
@@ -119,6 +121,7 @@ namespace ChessLibrary
             else
                 UsualMoveUpdate(move, inGameColor, ref activePlayerMoves, ref waitingPlayerMoves);
 
+            KingGuardsPiecesPosition.Clear();
 
             foreach (Vectors vector in activePlayerMoves)
                 vector.avaibleSquares.RemoveAll(item => IsMateAfterMove((char)vector.vectorPieceKey + vector.startPosition + item));
@@ -175,12 +178,20 @@ namespace ChessLibrary
         private void UpdateMovesLists(string from, string to, ref List<Vectors> activePlayerMoves, ref List<Vectors> waitingPlayerMoves)
         {
             for (int i = 0; i < activePlayerMoves.Count; i++)
-                if (InvalidVector(activePlayerMoves[i], from, to))
+            {
+                string vectorStartPosition = activePlayerMoves[i].startPosition;
+                if (InvalidVector(activePlayerMoves[i], from, to) || KingGuardsPiecesPosition.Exists(item => item == vectorStartPosition))
                     activePlayerMoves[i] = RecalculateVector(activePlayerMoves[i]);
+            }
+
 
             for (int i = 0; i < waitingPlayerMoves.Count; i++)
-                if (InvalidVector(waitingPlayerMoves[i], from, to))
+            {
+                string vectorStartPosition = waitingPlayerMoves[i].startPosition;
+                if (InvalidVector(waitingPlayerMoves[i], from, to) || KingGuardsPiecesPosition.Exists(item => item == vectorStartPosition))
                     waitingPlayerMoves[i] = RecalculateVector(waitingPlayerMoves[i]);
+            }
+
         }
 
 
@@ -214,12 +225,13 @@ namespace ChessLibrary
             Moves copyMoves = new Moves(copyDesk);
             copyDesk.UpdatePiecesOnDesk(move, inGameColor);
             ChessPlayer op = new Bot(inGameColor.FlipColor(), copyMoves, copyDesk);
-            
+
             result = copyDesk.IsKingInDanger(copyMoves.GetPlayerMoves(op.playerColor), inGameColor);
-            if (result) {
-                string movedFrom = move.Substring(1,2);
-                RecalculatedPiecesPosition.Add(movedFrom);
-            } 
+            if (result)
+            {
+                string movedFrom = move.Substring(1, 2);
+                KingGuardsPiecesPosition.Add(movedFrom);
+            }
             return result;
         }
 

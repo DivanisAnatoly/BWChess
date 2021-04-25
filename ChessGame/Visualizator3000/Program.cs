@@ -18,24 +18,26 @@ namespace Visualizator3000
         static void Main(string[] args)
         {
             gameManager.StartGame(playerColor: "white");
+
             myColorPieces = (gameManager.GetMyColor() == "white") ? whitePieces : blackPieces;
 
             while (true)
             {
                 Print(ChessToAscii());
+
                 Console.WriteLine("\n-FEN:" + gameManager.GetGameFen() + "\n");
+                
+                
+                string gameState = gameManager.GameState();
+                if (gameState != "CHECK" && gameState != "GAME IN PROGRESS") { Console.WriteLine("-Game state: " + gameState); break; }
+                Console.WriteLine("-Game state: " + gameState);
+
+
                 Console.WriteLine("\n-Player color:" + gameManager.GetMyColor() + "\n");
                 Console.WriteLine("-Last move(" + gameManager.GetOpponentColor() + "):" + gameManager.GetLastMove() + "\n");
 
-
                 List<string> recalculatedPieces = gameManager.RecalculatedPieces();
-                Console.Write("-Number of recalculated vectors : " + recalculatedPieces.Count());
-
-
-                string gameState = gameManager.GameState();
-                Console.WriteLine("\n\n-Game state: " + gameState);
-                if (gameState != "CHECK" && gameState != "GAME IN PROGRESS") break;
-
+                Console.WriteLine("-Number of recalculated vectors : " + recalculatedPieces.Count());
 
                 if (gameManager.GetMyColor() == gameManager.GetInGameColor())
                 {
@@ -79,7 +81,7 @@ namespace Visualizator3000
                 char piece = gameManager.GetFigureAt(pieceSquare);
 
                 if (!myColorPieces.Exists(item => item == piece)) return false;
-                
+
                 pieceMovesList = gameManager.GetAllAvaibleMoves(pieceSquare);
                 if (pieceMovesList.Count == 0) return false;
 
