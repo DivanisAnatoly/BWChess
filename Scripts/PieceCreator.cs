@@ -37,7 +37,6 @@ public class PieceCreator : MonoBehaviour
     //Создать клоны объекта фигуры и разместить на указанной позиции
     void PlaceFigure(string figure, int x, int y, int invertBoard)
     {
-
         GameObject spriteFigure = GameObject.Find(figure);
         GameObject currentSquare = GameObject.Find("" + (char)(x + 'a') + (y + 2*invertBoard));
         GameObject currentFigure = Instantiate(spriteFigure, currentSquare.transform.position, currentSquare.transform.rotation);

@@ -41,8 +41,6 @@ public class PieceMoves
                 if (Clicks.IsMouseButtonPressed())
                 {
                     Drop();
-                    if (gameManager.GetInGameColor() == "black") gameManager.BotMove();
-                    GenerateFigureMove(new Parser(gameManager.GetLastMove()));
                 }
                 break;
             case State.transform:
@@ -51,10 +49,26 @@ public class PieceMoves
                     newPawn += nameTransformFigure;
                     gameManager.PlayerMove(newPawn);
                     Debug.Log(newPawn);
-                    state = State.none;
+                    state = State.moveBot;
                     currentFigure = null;
                 }
                 break;
+            case State.moveBot:
+                {
+                    if (gameManager.GetInGameColor() == "black")
+                    {
+                        gameManager.BotMove();
+                        Parser botMove = new Parser(gameManager.GetLastMove(), "black");
+                        GenerateFigureMove(new Parser(gameManager.GetLastMove(), "black"));
+                        if (botMove.PossibilityTransform)
+                        {
+                            GameObject gameObject = GameObject.Find(gameManager.GetLastMove().Substring(5));
+                            transformFigure.TransformPawn(botMove.Name, gameObject.transform);
+                        } 
+                    }
+                    state = State.none;
+                    break;
+                }       
         }
         return false;
     }
@@ -64,25 +78,33 @@ public class PieceMoves
     {
         Vector2 clickPosition = Clicks.GetClickPosition();
         Transform clickedItem = Clicks.GetItemAt(clickPosition);
-        if (clickedItem == null) return;
-        Vector2 coordsSquare = constraints.CheckSquare(clickPosition);   //Можно удалить, существует только ради вывода имени клетки
+        if (clickedItem == null || !CheckColor(clickedItem)) { return; }
+        parser = new List<Parser>();
         parser = GetParseListForMoves(gameManager.GetAllAvaibleMoves(clickedItem.gameObject.name.Substring(1)));
+        if (parser == null) return;
+        string list = null;
+        foreach (Parser i in parser)  //Для отладки, можно в будущем удалить
+        {
+            Debug.Log(i);
+            list += " " + i.Name.name[0] + i.SquareFromMove.name + i.SquareToMove.name;
+        }
+            
+        Debug.Log("Ходы белого = " + list);
+
         square.HighlightSquare(clickedItem.gameObject, parser);
         currentFigure = clickedItem.gameObject;
         currentFigure.transform.localScale = transformFigure.IncreaseFigure(currentFigure.transform.localScale); 
         state = State.drop;
         Debug.Log("pickedUp " + currentFigure.name);
-
     }
 
     //По повторному клику мыши фигура падает на доску
     void Drop()
     {
-        Vector2 coordsClickSquare = constraints.CheckSquare(Clicks.GetClickPosition());
-        Vector2 coordsCurrentItem = constraints.CheckSquare(currentFigure.transform.position);   
-        GameObject toMoveSquare = GameObject.Find("" + (char)(coordsClickSquare.x + 'a') + (coordsClickSquare.y + 1));
+        Vector2 coordsClickSquare = constraints.CheckSquare(Clicks.GetClickPosition());  //Координаты кликнутой клетки
+        Vector2 coordsCurrentItem = constraints.CheckSquare(currentFigure.transform.position);   //Координаты текущей фигуры
+        GameObject toMoveSquare = GameObject.Find("" + (char)(coordsClickSquare.x + 'a') + (coordsClickSquare.y + 1)); //Клетка, по которой сделан клик, объект
         square.ReverseColorSquare(toMoveSquare, parser, out TypesOfMove typeMove);
-        Debug.Log(typeMove);
         if (typeMove != TypesOfMove.Null)
             if (toMoveSquare && (coordsCurrentItem != coordsClickSquare) && constraints.CheckTryCutFigure(toMoveSquare, currentFigure))
             {
@@ -91,7 +113,7 @@ public class PieceMoves
                 Debug.Log("Drop " + currentFigure.name[0] + (char)(coordsCurrentItem.x + 'a') + "" + (coordsCurrentItem.y + 1)
                               + (char)(coordsClickSquare.x + 'a') + (coordsClickSquare.y + 1));
             }
-        newPawn = currentFigure.name[0] + (char)(coordsCurrentItem.x + 'a') + "" + (coordsCurrentItem.y + 1)
+        newPawn = "" + currentFigure.name[0] + (char)(coordsCurrentItem.x + 'a') + "" + (coordsCurrentItem.y + 1)
                       + (char)(coordsClickSquare.x + 'a') + (coordsClickSquare.y + 1);
         currentFigure.transform.localScale = transformFigure.DecreaseFigure(currentFigure.transform.localScale);
         TypeMove(typeMove, coordsCurrentItem, coordsClickSquare);
@@ -108,32 +130,54 @@ public class PieceMoves
             chessMove.Name.transform.position = chessMove.SquareToMove.transform.position;
             chessMove.Name.name = chessMove.Name.name[0] + chessMove.SquareToMove.name;
         }
+        if (chessMove.Name.name == "ke8")
+            if (chessMove.SquareToMove.name == "c8")
+                GenerateFigureMove(new Parser("ra8d8", "black"));
+            else if (chessMove.SquareToMove.name == "g8")
+                GenerateFigureMove(new Parser("rh8f8", "black"));
     }
 
     void TypeMove(TypesOfMove typeMove, Vector2 coordsCurrentItem, Vector2 coordsClickSquare)
     {
-        if (typeMove == TypesOfMove.SCastling)
+        if (typeMove == TypesOfMove.Null)
+        {
+            state = State.none;
+            currentFigure = null;
+        }
+        else if (typeMove == TypesOfMove.SCastling)
         {
             Debug.Log(" 0-0 ");
-            GenerateFigureMove(new Parser("Rh1f1"));
+            if (gameManager.GetMyColor() == "white")
+            {
+                GenerateFigureMove(new Parser("Rh1f1", "white")); 
+            }
+            else if (gameManager.GetMyColor() == "black") GenerateFigureMove(new Parser("rh8f8", "black"));
             gameManager.PlayerMove(" 0-0 ");
+            state = State.moveBot;
+            currentFigure = null;
         }
         else if (typeMove == TypesOfMove.LCastling)
         {
             Debug.Log("0-0-0");
-            GenerateFigureMove(new Parser("Ra1d1"));
+            if (gameManager.GetMyColor() == "white")
+            {
+                GenerateFigureMove(new Parser("Ra1d1", "white"));
+            }
+            else if (gameManager.GetMyColor() == "black") GenerateFigureMove(new Parser("ra8d8", "black"));
             gameManager.PlayerMove("0-0-0");
+            state = State.moveBot;
+            currentFigure = null;
         }
-        if (typeMove == TypesOfMove.Transform)
+        else if (typeMove == TypesOfMove.Transform)
         {
             state = State.transform;
             Debug.Log("Кликните по нужной фигуре");
         }
-        else
+        else if (typeMove == TypesOfMove.Normal)
         {
             gameManager.PlayerMove("" + currentFigure.name[0] + (char)(coordsCurrentItem.x + 'a') + "" + (coordsCurrentItem.y + 1)
                               + (char)(coordsClickSquare.x + 'a') + (coordsClickSquare.y + 1));
-            state = State.none;
+            state = State.moveBot;
             currentFigure = null;
         }
     }
@@ -143,8 +187,16 @@ public class PieceMoves
     {
         foreach (string probableMoves in ProbableMoves)
         {
-            parser.Add(new Parser(probableMoves));
+            parser.Add(new Parser(probableMoves, gameManager.GetMyColor()));
         }
         return parser;
+    }
+
+    bool CheckColor(Transform ClickObject)
+    {
+        if ((ClickObject.name[0] >= 'A' && ClickObject.name[0] <= 'Z' && gameManager.GetMyColor() == "white") ||
+           (ClickObject.name[0] >= 'a' && ClickObject.name[0] <= 'z' && gameManager.GetMyColor() == "black"))
+           return true;
+        return false;
     }
 }

@@ -44,19 +44,19 @@ public class Constraints
     }
 
     //Попытка срубить фигуру, если на клетке противник - перемещение фигуры на поле поверженных фигур
-    public bool CheckTryCutFigure(GameObject goSquare, GameObject item)
+    public bool CheckTryCutFigure(GameObject ToMoveSquare, GameObject currentFigure)
     {
-        Transform goFigure = Clicks.GetItemAt(goSquare.transform.position);
-        if (!goFigure) return true;
-        GameObject fieldForDefeatFigures = GameObject.Find("Square" + goFigure.name[0]);
-        bool checkEnemy = CheckEnemyFigure(goFigure, item);
-
+        Transform toMoveSquare = Clicks.GetItemAt(ToMoveSquare.transform.position);
+        if (!toMoveSquare) return true;
+        GameObject fieldForDefeatFigures = GameObject.Find("Square" + toMoveSquare.name[0]);
+        bool checkEnemy = CheckEnemyFigure(toMoveSquare, currentFigure);
+        Debug.Log("ПЕРЕД");
         if (checkEnemy)
         {
-            goFigure.transform.position = fieldForDefeatFigures.transform.position;
-            goFigure.tag = "Static";
+            toMoveSquare.transform.position = fieldForDefeatFigures.transform.position;
+            toMoveSquare.tag = "Static";
             RaycastHit2D[] figures = Physics2D.RaycastAll(fieldForDefeatFigures.transform.position, fieldForDefeatFigures.transform.position, 0.5f); //Заготовка для счётчика
-            Debug.Log(figures.Length);
+            Debug.Log("eiouhjuriofjreiojrefjio" + figures.Length);
             return true;
         }
         else

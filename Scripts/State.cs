@@ -2,5 +2,6 @@
 {
     none,
     drop,
-    transform
+    transform,
+    moveBot
 }
