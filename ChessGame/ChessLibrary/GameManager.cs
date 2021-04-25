@@ -48,12 +48,13 @@ namespace ChessLibrary
 
 
         //Ход игрока
-        public void PlayerMove(string move)
+        public void PlayerMove(string moveName)
         {
+            PieceMove move = new PieceMove(player1.playerColor, moveName);
             List<string> playerMoves = moves.GetPlayerMoves(player1.playerColor);
             if (playerMoves.Count != 0 && player1.playerColor == game.inGameColor)
             {
-                if (playerMoves.Exists(item => item == move))
+                if (playerMoves.Exists(item => item == moveName))
                 {
                     player1.MakeMove(move,desk);
                     game.PrepareNextMove(move);
@@ -68,7 +69,7 @@ namespace ChessLibrary
             List<string> opponentMoves = moves.GetPlayerMoves(player2.playerColor);
             if (opponentMoves.Count != 0 && player2.playerColor == game.inGameColor)
             {
-                player2.MakeMove("", desk);
+                player2.MakeMove(new PieceMove(), desk);
                 game.PrepareNextMove(player2.lastMove);
             }
         }
@@ -131,11 +132,8 @@ namespace ChessLibrary
 
 
         //получить список клеток, на которых находятся фигуры с пересчитанными(невалидными) векторами
-        public List<string> RecalculatedPieces() 
-        {
-            List<string> result = new List<string>(moves.RecalculatedPiecesPosition);
-            return result;
-        }
+        public List<string> RecalculatedPieces() { return new List<string>(moves.RecalculatedPiecesPosition); }
+
 
     }
 }

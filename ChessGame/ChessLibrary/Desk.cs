@@ -11,7 +11,6 @@ namespace ChessLibrary
     {
         internal ForsythEdwardsNotation notation;
         internal Piece[,] pieces = new Piece[8, 8];
-        internal List<Piece> deadPieces = new List<Piece>();
         internal Square[,] deskSquares = new Square[8, 8];
 
 
@@ -38,38 +37,34 @@ namespace ChessLibrary
 
 
         //Обновить инф. о положении фигур на доске (массивы фигур,клеток и взятых фигур)
-        internal void UpdatePiecesOnDesk(string move, Color inGameColor)
+        internal void UpdatePiecesOnDesk(PieceMove pieceMove, Color inGameColor)
         {
             Square kingSq = FindKing(inGameColor);
             King k = (King)kingSq.ownedPiece;
 
-            if (move != " 0-0 " && move != "0-0-0")
+            if (pieceMove.name != " 0-0 " && pieceMove.name != "0-0-0")
             {
-                int fromX = move[1] - 'a'; int fromY = move[2] - '1';
-                int toX = move[3] - 'a'; int toY = move[4] - '1';
-
-                //cохр.съеденную фигуру
-                if (pieces[toX, toY] != Piece.nullPiece)
-                    deadPieces.Add(pieces[toX, toY]);
+                int fromX = pieceMove.fromX; int fromY = pieceMove.fromY;
+                int toX = pieceMove.toX; int toY = pieceMove.toY;
 
                 //перемещение фигуры
                 pieces[toX, toY] = pieces[fromX, fromY];
                 pieces[fromX, fromY] = Piece.nullPiece;
 
                 //взятие на проходе
-                if ((move[0] == (char)blackPawn || move[0] == (char)whitePawn) && notation.EnPassant == deskSquares[toX, toY].Name) pieces[toX, fromY] = Piece.nullPiece;
+                if ((pieceMove.pieceKey == blackPawn || pieceMove.pieceKey == whitePawn) && notation.EnPassant == deskSquares[toX, toY].Name) pieces[toX, fromY] = Piece.nullPiece;
 
                 //определяем был ли совершен ход пешкой на две клетки
-                if (Math.Abs(toY - fromY) == 2 && (move[0] == (char)blackPawn || move[0] == (char)whitePawn))
+                if (Math.Abs(toY - fromY) == 2 && (pieceMove.pieceKey == blackPawn || pieceMove.pieceKey == whitePawn))
                     notation.EnPassant = deskSquares[(toX + fromX) / 2, (toY + fromY) / 2].Name;
                 else
                     notation.EnPassant = "-";
 
                 //превращение пешки (Pe7e8N,Pa7b8Q и т.д.). Превращение фиксируется на 6-ом знаке(если оно есть)
-                if (move.Length == 6) pieces[toX, toY] = ParseToPiece(move[5]);
+                if (pieceMove.promotion) pieces[toX, toY] = ParseToPiece(pieceMove.promotionCharKey);
 
                 //право рокировки навсегда теряется при ходе короля
-                if ((k.shortCastling || k.longCastling) && move[0] == (char)k.pieceKey) { k.shortCastling = false; k.longCastling = false; }
+                if ((k.shortCastling || k.longCastling) && pieceMove.pieceKey == k.pieceKey) { k.shortCastling = false; k.longCastling = false; }
 
                 //право рокировки с ладьей навсегда теряется при ходе этой ладьи или ее взятии
                 if (k.shortCastling && k.pieceKey == whiteKing && pieces[7, 0].pieceKey != whiteRook) { k.shortCastling = false; }
@@ -80,7 +75,7 @@ namespace ChessLibrary
             }
             else
             {
-                MakeCastling(k, move);
+                MakeCastling(k, pieceMove);
             }
 
             UpdateDeskSquares();
@@ -88,28 +83,13 @@ namespace ChessLibrary
 
 
         //рокировка (всегда происходит на конкретных клетках, поэтому там присутствуют magic numbers)
-        private void MakeCastling(King k, string move)
+        private void MakeCastling(King k, PieceMove pMove)
         {
-            if (move == " 0-0 " && k.pieceKey == whiteKing)
-            {
-                pieces[6, 0] = pieces[4, 0]; pieces[4, 0] = Piece.nullPiece;
-                pieces[5, 0] = pieces[7, 0]; pieces[7, 0] = Piece.nullPiece;
-            }
-            if (move == "0-0-0" && k.pieceKey == whiteKing)
-            {
-                pieces[2, 0] = pieces[4, 0]; pieces[4, 0] = Piece.nullPiece;
-                pieces[3, 0] = pieces[0, 0]; pieces[0, 0] = Piece.nullPiece;
-            }
-            if (move == " 0-0 " && k.pieceKey == blackKing)
-            {
-                pieces[6, 7] = pieces[4, 7]; pieces[4, 7] = Piece.nullPiece;
-                pieces[5, 7] = pieces[7, 7]; pieces[7, 7] = Piece.nullPiece;
-            }
-            if (move == "0-0-0" && k.pieceKey == blackKing)
-            {
-                pieces[2, 7] = pieces[4, 7]; pieces[4, 7] = Piece.nullPiece;
-                pieces[3, 7] = pieces[0, 7]; pieces[0, 7] = Piece.nullPiece;
-            }
+            pieces[pMove.toKX, pMove.toKY] = pieces[pMove.fromKX, pMove.fromKY]; 
+            pieces[pMove.fromKX, pMove.fromKY] = Piece.nullPiece;
+            pieces[pMove.toRX, pMove.toRY] = pieces[pMove.fromRX, pMove.fromRY]; 
+            pieces[pMove.fromRX, pMove.fromRY] = Piece.nullPiece;
+
             k.shortCastling = false; k.longCastling = false;
         }
 

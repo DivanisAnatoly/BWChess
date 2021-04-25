@@ -20,12 +20,12 @@ namespace ChessLibrary
         internal List<string> GetMoves()
         {
             List<string> vectorPieceMoves = new List<string>();
-            foreach (string square in avaibleSquares)
+            foreach (string squareName in avaibleSquares)
             {
-                if (square != "0-0-0" && square != " 0-0 ")
-                    vectorPieceMoves.Add((char)vectorPieceKey + startPosition + square);
+                if (squareName != "0-0-0" && squareName != " 0-0 ")
+                    vectorPieceMoves.Add((char)vectorPieceKey + startPosition + squareName);
                 else
-                    vectorPieceMoves.Add(square);
+                    vectorPieceMoves.Add(squareName);
             }
             return vectorPieceMoves;
         }

@@ -9,7 +9,7 @@ namespace ChessLibrary
     class Pawn : Piece
     {
         readonly int stepY;
-
+        
 
         internal Pawn(PiecesKeys pieceKey, Color pieceColor) : base(pieceKey, pieceColor)
         {

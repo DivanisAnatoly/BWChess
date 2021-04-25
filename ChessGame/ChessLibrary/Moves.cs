@@ -25,10 +25,8 @@ namespace ChessLibrary
 
         public List<string> GetPlayerMoves(Color playerColor)
         {
-            List<Vectors> moves;
             List<string> result = new List<string>();
-
-            moves = (playerColor == Color.white) ? whiteMoves : blackMoves;
+            List<Vectors> moves = (playerColor == Color.white) ? whiteMoves : blackMoves;
 
             foreach (Vectors vector in moves)
                 result.AddRange(vector.GetMoves());
@@ -61,13 +59,13 @@ namespace ChessLibrary
 
             if (!IsCheck())
             {
-                if (k.shortCastling && k.IsShortCastlingPossibleNow(desk.deskSquares, ksq))
+                if (k.CanMakeShortCastling(desk.deskSquares, ksq))
                 {
                     if (k.pieceColor == Color.black && !IsMateAfterMove("ke8f8") && !IsMateAfterMove("ke8g8")) kingVector.avaibleSquares.Add(" 0-0 ");
                     if (k.pieceColor == Color.white && !IsMateAfterMove("ke1f1") && !IsMateAfterMove("ke1g1")) kingVector.avaibleSquares.Add(" 0-0 ");
                 }
 
-                if (k.longCastling && k.IsLongCastlingPossibleNow(desk.deskSquares, ksq))
+                if (k.CanMakeLongCastling(desk.deskSquares, ksq))
                 {
                     if (k.pieceColor == Color.black && !IsMateAfterMove("ke8d8") && !IsMateAfterMove("ke8c8")) kingVector.avaibleSquares.Add("0-0-0");
                     if (k.pieceColor == Color.white && !IsMateAfterMove("ke1d1") && !IsMateAfterMove("ke1c1")) kingVector.avaibleSquares.Add("0-0-0");
@@ -76,16 +74,14 @@ namespace ChessLibrary
         }
 
 
-        internal void UpdateMoves(string move = "none")
+        internal void UpdateMoves(PieceMove pieceMove = null)
         {
             RecalculatedPiecesPosition.Clear();
-
-            List<Vectors> activePlayerMoves;
-            List<Vectors> waitingPlayerMoves;
-
+            
             Color inGameColor = desk.notation.InGameColor;
-            activePlayerMoves = (inGameColor == Color.white) ? whiteMoves : blackMoves;
-            waitingPlayerMoves = (inGameColor == Color.white) ? blackMoves : whiteMoves;
+
+            List<Vectors> activePlayerMoves = (inGameColor == Color.white) ? whiteMoves : blackMoves;;
+            List<Vectors> waitingPlayerMoves = (inGameColor == Color.white) ? blackMoves : whiteMoves;;
 
             Vectors wKingVector = whiteMoves.Find(item => item.vectorPieceKey == whiteKing);
             Vectors bKingVector = blackMoves.Find(item => item.vectorPieceKey == blackKing);
@@ -103,7 +99,7 @@ namespace ChessLibrary
             }
 
 
-            if (move == "none")
+            if (pieceMove == null)
             {
                 foreach (Vectors vector in activePlayerMoves)
                     vector.avaibleSquares.RemoveAll(item => IsMateAfterMove((char)vector.vectorPieceKey + vector.startPosition + item));
@@ -112,14 +108,12 @@ namespace ChessLibrary
                 return;
             }
 
+            movesStory.Add(pieceMove.name);
 
-            movesStory.Add(move);
-
-
-            if (move == "0-0-0" || move == " 0-0 ")
-                CastlingMoveUpdate(move, inGameColor, ref activePlayerMoves, ref waitingPlayerMoves);
+            if (pieceMove.castling!="none")
+                CastlingMoveUpdate(pieceMove, ref activePlayerMoves, ref waitingPlayerMoves);
             else
-                UsualMoveUpdate(move, inGameColor, ref activePlayerMoves, ref waitingPlayerMoves);
+                UsualMoveUpdate(pieceMove, ref activePlayerMoves, ref waitingPlayerMoves);
 
             KingGuardsPiecesPosition.Clear();
 
@@ -130,10 +124,10 @@ namespace ChessLibrary
         }
 
 
-        private void UsualMoveUpdate(string move, Color inGameColor, ref List<Vectors> activePlayerMoves, ref List<Vectors> waitingPlayerMoves)
+        private void UsualMoveUpdate(PieceMove pieceMove, ref List<Vectors> activePlayerMoves, ref List<Vectors> waitingPlayerMoves)
         {
-            string from = move.Substring(1, 2);
-            string to = move.Substring(3, 2);
+            string from = pieceMove.from;
+            string to = pieceMove.to;
 
             activePlayerMoves.RemoveAll(item => item.startPosition == to);
 
@@ -144,25 +138,15 @@ namespace ChessLibrary
         }
 
 
-        private void CastlingMoveUpdate(string move, Color inGameColor, ref List<Vectors> activePlayerMoves, ref List<Vectors> waitingPlayerMoves)
+        private void CastlingMoveUpdate(PieceMove pieceMove, ref List<Vectors> activePlayerMoves, ref List<Vectors> waitingPlayerMoves)
         {
             string fromK, toK, fromR, toR;
 
-            if (inGameColor.FlipColor() == Color.white)
-            {
-                fromK = "e1";
-                if (move == "0-0-0")
-                { toK = "c1"; fromR = "a1"; toR = "d1"; }
-                else { toK = "g1"; fromR = "h1"; toR = "f1"; }
-            }
-            else
-            {
-                fromK = "e8";
-                if (move == "0-0-0")
-                { toK = "c8"; fromR = "a8"; toR = "d8"; }
-                else { toK = "g8"; fromR = "h8"; toR = "f8"; }
-            }
-
+            fromK = pieceMove.fromK;
+            toK = pieceMove.toK;
+            fromR = pieceMove.fromR;
+            toR = pieceMove.toR;
+            
             int indexK = waitingPlayerMoves.FindIndex(item => item.startPosition == fromK);
             int indexR = waitingPlayerMoves.FindIndex(item => item.startPosition == fromR);
 
@@ -218,19 +202,25 @@ namespace ChessLibrary
         //Проверка хода на угрозу мата
         public bool IsMateAfterMove(string move)
         {
-            bool result;
+            bool result; 
             Color inGameColor = desk.notation.InGameColor;
+            PieceMove pieceMove = new PieceMove(inGameColor, move);
             ForsythEdwardsNotation copyN = (ForsythEdwardsNotation)desk.notation.Clone();
             Desk copyDesk = new Desk(copyN);
             Moves copyMoves = new Moves(copyDesk);
-            copyDesk.UpdatePiecesOnDesk(move, inGameColor);
+            copyDesk.UpdatePiecesOnDesk(pieceMove, inGameColor);
             ChessPlayer op = new Bot(inGameColor.FlipColor(), copyMoves, copyDesk);
 
             result = copyDesk.IsKingInDanger(copyMoves.GetPlayerMoves(op.playerColor), inGameColor);
             if (result)
             {
-                string movedFrom = move.Substring(1, 2);
-                KingGuardsPiecesPosition.Add(movedFrom);
+                string movedFrom = pieceMove.from;
+                if (!KingGuardsPiecesPosition.Exists(item => item == movedFrom))
+                {
+                    KingGuardsPiecesPosition.Add(movedFrom);
+                    RecalculatedPiecesPosition.Add(movedFrom);
+                }
+
             }
             return result;
         }

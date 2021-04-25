@@ -60,12 +60,12 @@ namespace ChessLibrary
 
 
         //Подготовка к след. ходу
-        internal void PrepareNextMove(string move)
+        internal void PrepareNextMove(PieceMove pieceMove)
         {
             moveNumber++;
             inGameColor = inGameColor.FlipColor();
             ParseGameToFEN();
-            moves.UpdateMoves(move);
+            moves.UpdateMoves(pieceMove);
         }
 
 

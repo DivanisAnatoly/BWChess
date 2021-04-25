@@ -10,7 +10,7 @@ namespace ChessLibrary
     {
         internal Color playerColor { get; private set; }
         internal Moves playersMoves;
-        internal string lastMove;
+        internal PieceMove lastMove;
 
 
         internal ChessPlayer(Color playerColor, Moves playersMoves, Desk desk)
@@ -24,8 +24,7 @@ namespace ChessLibrary
         //Просчитать доступные ходы для всех фигур (исключается просчет рокировки)
         internal void CalculateMoves(Desk desk)
         {
-            List<Vectors> allPlayerMoves;
-            allPlayerMoves = (playerColor == Color.white) ? playersMoves.whiteMoves : playersMoves.blackMoves;
+            List<Vectors> allPlayerMoves = (playerColor == Color.white) ? playersMoves.whiteMoves : playersMoves.blackMoves;
 
             foreach (Square square in desk.deskSquares)
                 if (square.ownedPiece.pieceColor == playerColor)
@@ -34,7 +33,7 @@ namespace ChessLibrary
 
 
         //Сделать ход
-        internal abstract void MakeMove(string move, Desk desk);
+        internal abstract void MakeMove(PieceMove move, Desk desk);
 
 
     }

@@ -14,11 +14,11 @@ namespace ChessLibrary
         public Bot(Color playerColor, Moves playersMoves, Desk desk) : base(playerColor, playersMoves, desk) { }
 
 
-        internal override void MakeMove(string move, Desk desk)
+        internal override void MakeMove(PieceMove move, Desk desk)
         {
             List<string> moves = playersMoves.GetPlayerMoves(playerColor);
-            lastMove = moves[random.Next(moves.Count)];
-            //System.Threading.Thread.Sleep(2000);
+            lastMove = new PieceMove(playerColor, moves[random.Next(moves.Count)]);
+
             desk.UpdatePiecesOnDesk(lastMove, playerColor);
         }
 

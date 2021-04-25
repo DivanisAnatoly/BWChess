@@ -61,8 +61,9 @@ namespace ChessLibrary
 
 
         //Проверки на отсутствие фигур между королем и ладьями(для длинной рокировки)
-        public bool IsLongCastlingPossibleNow(Square[,] deskSquares, Square ownsquare)
+        public bool CanMakeLongCastling(Square[,] deskSquares, Square ownsquare)
         {
+            if(!longCastling) return false;
             if (deskSquares[ownsquare.x - 1, ownsquare.y].ownedPiece != nullPiece
                 || deskSquares[ownsquare.x - 2, ownsquare.y].ownedPiece != nullPiece
                 || deskSquares[ownsquare.x - 3, ownsquare.y].ownedPiece != nullPiece) return false;
@@ -71,8 +72,9 @@ namespace ChessLibrary
 
 
         //Проверки на отсутствие фигур между королем и ладьями(для короткой рокировки)
-        public bool IsShortCastlingPossibleNow(Square[,] deskSquares, Square ownsquare)
+        public bool CanMakeShortCastling(Square[,] deskSquares, Square ownsquare)
         {
+            if (!shortCastling) return false;
             if (deskSquares[ownsquare.x + 1, ownsquare.y].ownedPiece != nullPiece
                 || deskSquares[ownsquare.x + 2, ownsquare.y].ownedPiece != nullPiece) return false;
             return true;
