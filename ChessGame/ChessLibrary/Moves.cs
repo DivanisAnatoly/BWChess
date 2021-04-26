@@ -15,7 +15,7 @@ namespace ChessLibrary
         internal List<string> RecalculatedPiecesPosition = new List<string>();
         internal List<string> KingGuardsPiecesPosition = new List<string>();
         private readonly Desk desk;
-
+        private Color inGameColor;
 
         public Moves(Desk desk)
         {
@@ -77,11 +77,11 @@ namespace ChessLibrary
         internal void UpdateMoves(PieceMove pieceMove = null)
         {
             RecalculatedPiecesPosition.Clear();
-            
-            Color inGameColor = desk.notation.InGameColor;
 
-            List<Vectors> activePlayerMoves = (inGameColor == Color.white) ? whiteMoves : blackMoves;;
-            List<Vectors> waitingPlayerMoves = (inGameColor == Color.white) ? blackMoves : whiteMoves;;
+            inGameColor = desk.notation.InGameColor;
+
+            List<Vectors> activePlayerMoves = (inGameColor == Color.white) ? whiteMoves : blackMoves; ;
+            List<Vectors> waitingPlayerMoves = (inGameColor == Color.white) ? blackMoves : whiteMoves; ;
 
             Vectors wKingVector = whiteMoves.Find(item => item.vectorPieceKey == whiteKing);
             Vectors bKingVector = blackMoves.Find(item => item.vectorPieceKey == blackKing);
@@ -110,7 +110,7 @@ namespace ChessLibrary
 
             movesStory.Add(pieceMove.name);
 
-            if (pieceMove.castling!="none")
+            if (pieceMove.castling != "none")
                 CastlingMoveUpdate(pieceMove, ref activePlayerMoves, ref waitingPlayerMoves);
             else
                 UsualMoveUpdate(pieceMove, ref activePlayerMoves, ref waitingPlayerMoves);
@@ -146,7 +146,7 @@ namespace ChessLibrary
             toK = pieceMove.toK;
             fromR = pieceMove.fromR;
             toR = pieceMove.toR;
-            
+
             int indexK = waitingPlayerMoves.FindIndex(item => item.startPosition == fromK);
             int indexR = waitingPlayerMoves.FindIndex(item => item.startPosition == fromR);
 
@@ -192,9 +192,12 @@ namespace ChessLibrary
         //Проверка на невалидность вектора
         internal bool InvalidVector(Vectors vector, string from, string to)
         {
+            string EnPassant = desk.notation.EnPassant;
             if (vector.occupiedSquares.Exists(item => item == from) || vector.occupiedSquares.Exists(item => item == to)
                 || vector.avaibleSquares.Exists(item => item == from) || vector.avaibleSquares.Exists(item => item == to))
                 return true;
+            if (EnPassant != "-" && vector.vectorPieceKey == (inGameColor == Color.white ? whitePawn : blackPawn)
+                && vector.occupiedSquares.Exists(item => item == EnPassant)) return true;
             return false;
         }
 
@@ -202,8 +205,8 @@ namespace ChessLibrary
         //Проверка хода на угрозу мата
         public bool IsMateAfterMove(string move)
         {
-            bool result; 
-            Color inGameColor = desk.notation.InGameColor;
+            bool result;
+            //Color inGameColor = desk.notation.InGameColor;
             PieceMove pieceMove = new PieceMove(inGameColor, move);
             ForsythEdwardsNotation copyN = (ForsythEdwardsNotation)desk.notation.Clone();
             Desk copyDesk = new Desk(copyN);

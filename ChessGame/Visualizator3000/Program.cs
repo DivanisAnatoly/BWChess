@@ -17,7 +17,7 @@ namespace Visualizator3000
 
         static void Main(string[] args)
         {
-            gameManager.StartGame();
+            gameManager.StartGame(playerColor:"white");
 
             myColorPieces = (gameManager.GetMyColor() == "white") ? whitePieces : blackPieces;
 

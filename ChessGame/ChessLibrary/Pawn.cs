@@ -66,7 +66,7 @@ namespace ChessLibrary
                 }
                 if (CanJump && ownSquare.AbsDeltaX(square) == 0 && ownSquare.DeltaY(square) == stepY * 2)
                 {
-                    if (desk.deskSquares[square.x, square.y].ownedPiece != Piece.nullPiece)
+                    if (desk.deskSquares[square.x, square.y].ownedPiece != Piece.nullPiece || avaibleSquares[square.x, square.y - stepY] == Square.none)
                     {
                         movesVector.occupiedSquares.Add(square.Name);
                         avaibleSquares[square.x, square.y] = Square.none;
