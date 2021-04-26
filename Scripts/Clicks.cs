@@ -8,9 +8,16 @@ static public class Clicks
     static public Transform GetItemAt(Vector3 position)
     {
         Constraints constraints = new Constraints();
-        RaycastHit2D[] figures = Physics2D.RaycastAll(position, position, 0.5f);
+        position.z = 100f;
+        Vector3 direction = new Vector3(position.x, position.y, 0f);
+        RaycastHit2D[] figures = Physics2D.RaycastAll(position, direction, 0.5f);
+        Debug.Log("GetItemAT");
+        Debug.Log(figures.Length);
         if (figures.Length == 0 || !constraints.CheckClickFigureOnBoard(figures[0].transform))
+        {
+            Debug.Log("nullllll");
             return null;
+        }
         return figures[0].transform;
     }
 

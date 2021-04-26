@@ -9,19 +9,18 @@ public class Square
     public void HighlightSquare(GameObject clickedItem, List<Parser> parser)
     {
         Constraints constraints = new Constraints();
-        foreach (Parser i in parser)
+        foreach (Parser currentMove in parser)
         {
-            Transform itemToMove = Clicks.GetItemAt(i.SquareToMove.transform.position);
-            if (constraints.CheckSquare(clickedItem.transform.position) == constraints.CheckSquare(i.SquareFromMove.transform.position) &&
-                clickedItem.name == i.Name.name)
+            Transform itemToMove = Clicks.GetItemAt(currentMove.SquareToMove.transform.position);  //Объект, который может существовать
+            if (clickedItem.name == currentMove.Name.name)
             {
                 if (itemToMove && constraints.CheckEnemyFigure(itemToMove, clickedItem))
                 {
-                    PlaceAMSquare(i.SquareToMove, "Attack");
-                    i.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                    PlaceAMSquare(currentMove.SquareToMove, "Attack");
+                    currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
                 }
                 else
-                    i.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                    currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
             }
 
         }
@@ -29,31 +28,31 @@ public class Square
     }
 
     //Изменение цвета клетки
-    public void ReverseColorSquare(GameObject goSquare, List<Parser> parser, out TypesOfMove typeMove)
+    public void ReverseColorSquare(GameObject toMoveSquare, List<Parser> parser, out TypesOfMove typeMove)
     {
         typeMove = TypesOfMove.Null;
         Color colorSquare = new Color(1f, 1f, 1f, 1f);
-        for (int i = 0; i < parser.Count; i++)
+        foreach (Parser currentMove in parser)
         {
-            Debug.Log("" + parser[i].Name.name + "" + parser[i].SquareToMove.name);
-            if (goSquare == parser[i].SquareToMove && goSquare.GetComponent<SpriteRenderer>().color == colorSquare)
+            if (toMoveSquare == currentMove.SquareToMove && toMoveSquare.GetComponent<SpriteRenderer>().color == colorSquare)
             {
-
                 typeMove = TypesOfMove.Normal;
-                if ((parser[i].Name.name[0] == 'P' && parser[i].SquareToMove.name[1] == '8') ||
-                    parser[i].Name.name[0] == 'p' && parser[i].SquareToMove.name[1] == '1')
+                if ((currentMove.Name.name[0] == 'P' && currentMove.SquareToMove.name[1] == '8') ||
+                    currentMove.Name.name[0] == 'p' && currentMove.SquareToMove.name[1] == '1')
                     typeMove = TypesOfMove.Transform;
-                else if (parser[i].Name.name == "Ke1" && parser[i].SquareToMove.name == "g1")
+                else if (currentMove.Name.name == "Ke1" && currentMove.SquareToMove.name == "g1" || 
+                    currentMove.Name.name == "ke8" && currentMove.SquareToMove.name == "g8")
                 {
                     typeMove = TypesOfMove.SCastling;
                 }
-                else if (parser[i].Name.name == "Ke1" && parser[i].SquareToMove.name == "c1")
+                else if (currentMove.Name.name == "Ke1" && currentMove.SquareToMove.name == "c1" || 
+                    currentMove.Name.name == "ke8" && currentMove.SquareToMove.name == "c8")
                 {
                     typeMove = TypesOfMove.LCastling;
                 }
             }
-            PlaceAMSquare(parser[i].SquareToMove, "Movement");
-            parser[i].SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
+            PlaceAMSquare(currentMove.SquareToMove, "Movement");
+            currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
         }
         return;
     }

@@ -27,7 +27,7 @@ public class TransformFigure
 
         figureFromTransformField.position = pawn.transform.position;
         figureFromTransformField.name += pawn.name.Substring(1);
-        pawn.transform.position = GameObject.Find("Square" + pawn.name).transform.position;
+        pawn.transform.position = GameObject.Find("Square" + pawn.name[0]).transform.position;
         pawn.tag = "Static";
         figureFromTransformField.tag = "Active";
         return figureFromTransformField.name.Substring(0, 1);
