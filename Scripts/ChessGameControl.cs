@@ -8,8 +8,8 @@ using Newtonsoft.Json;
 
 public class ChessGameControl : MonoBehaviour
 {
-    [SerializeField] private string fen = @"{ 'PiecePosition': 'r111k11r/pppppppp/8/8/8/8/PPPPPPPP/R111K11RR','InGameColor':'white',
-                                                'Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }";
+    private string fen = @"{ 'PiecePosition': '4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3','InGameColor':'white',
+                                                'Castling': '----','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }";
     private PieceM pieceMoves;
     private GameManager gameManager;
     private PieceCreator pieceCreator;

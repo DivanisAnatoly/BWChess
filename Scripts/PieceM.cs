@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using ChessLibrary;
+using Newtonsoft.Json;
 
 public class PieceM
 {
     private Constraints constraints;                                //Ограничения области клика
     private TransformFigure transformFigure;                        //Превращение пешки
     private GameManager gameManager;
+    ForsythEdwardsNotation notation;
 
     private List<Parser> Parser { get; set; }                       //Список распарсенных ходов
 
@@ -77,7 +79,7 @@ public class PieceM
         currentFigure = clickedObject;                                                          //Присвоение глобальной переменной
         GetParseListForMoves(gameManager.GetAllAvaibleMoves(currentFigure.name.Substring(1)));  //Парсинг ходов кликнутой фигуры
         string list = null;
-        foreach (string i in gameManager.GetAllAvaibleMoves(clickedObject.name.Substring(1)))
+        foreach (string i in gameManager.GetAllAvaibleMoves(currentFigure.name.Substring(1)))
             list += " " + i;
         Debug.Log(list);
         Debug.Log(gameManager.GetGameFen());
@@ -154,7 +156,7 @@ public class PieceM
             chessMove.Name.name = chessMove.Name.name[0] + chessMove.SquareToMove.name;
             ChessGameControl.dictionaryOfFigures[chessMove.SquareToMove.name] = chessMove.Name;
             if (CheckTransformMove(chessMove)) return;
-            TryGenerateEnPassan();                                          //Нужно доделать
+            TryGenerateEnPassan(chessMove);                                          //Нужно доделать
             if (TryGenerateCastlingMove(chessMove.Name.name[0].ToString() + chessMove.SquareFromMove.name + chessMove.SquareToMove.name))
             {
                 stateMove = StateMove.pick;
@@ -201,9 +203,25 @@ public class PieceM
         return false;
     }
 
-    private void TryGenerateEnPassan()
+    private void TryGenerateEnPassan(Parser chessMove)
     {
-
+        notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(gameManager.GetGameFen());
+        if (notation.EnPassant == "-") return;
+        string squarePawnForKilledW = notation.EnPassant[0].ToString() + (char)(notation.EnPassant[1] + 1);
+        string squarePawnForKilledB = notation.EnPassant[0].ToString() + (char)(notation.EnPassant[1] - 1);
+        Debug.Log(notation.InGameColor);
+        if (chessMove.Name.name[0] == 'P' && chessMove.SquareToMove.name == notation.EnPassant && notation.InGameColor == TeamColor.white)
+        {   
+            constraints.MovingFigureOnDefeat(ChessGameControl.dictionaryOfFigures[squarePawnForKilledB]);
+            ChessGameControl.dictionaryOfFigures[squarePawnForKilledB] = null;
+            Debug.Log("Пешка уничтожена");
+        }
+        else if  (chessMove.Name.name[0] == 'p' && chessMove.SquareToMove.name == notation.EnPassant && notation.InGameColor == TeamColor.black)
+        {
+            constraints.MovingFigureOnDefeat(ChessGameControl.dictionaryOfFigures[squarePawnForKilledW]);
+            ChessGameControl.dictionaryOfFigures[squarePawnForKilledB] = null;
+            Debug.Log("Пешка уничтожена");
+        }
     }
 
     private bool CheckTransformMove(Parser chessMove)
@@ -229,6 +247,7 @@ public class PieceM
     private void CheckStatusGame()
     {
         Debug.Log($"состояние хода = {stateMove}, состояние партии = {gameManager.GameState()}");
+        Debug.Log(gameManager.GetGameFen());
     }
 
     private void FlipMovePlayerVsBot(string chessMove)

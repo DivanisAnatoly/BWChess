@@ -48,15 +48,9 @@ public class Constraints
     public bool CheckTryCutFigure(GameObject toMoveFigure, GameObject currentFigure)
     {
         if (!toMoveFigure) return true;
-        RaycastHit2D[] figures;
-        GameObject fieldForDefeatFigures = GameObject.Find("Square" + toMoveFigure.name[0]);
         if (CheckEnemyFigure(toMoveFigure, currentFigure))
         {
-            toMoveFigure.transform.position = fieldForDefeatFigures.transform.position;
-            toMoveFigure.name = toMoveFigure.name[0].ToString();
-            toMoveFigure.tag = "Static";
-            figures = Physics2D.RaycastAll(fieldForDefeatFigures.transform.position, fieldForDefeatFigures.transform.position, 0.5f); //Заготовка для счётчика
-            Debug.Log($" На поле поверженных фигур {toMoveFigure.name} = {figures.Length}");
+            MovingFigureOnDefeat(toMoveFigure);
             return true;
         }
         else
@@ -83,5 +77,15 @@ public class Constraints
         }
         clickedSquare = GameObject.Find("" + (char)(coordClick.x + 'a') + (coordClick.y + 1));
     
+    }
+
+    public void MovingFigureOnDefeat(GameObject toMoveFigure)
+    {
+        GameObject fieldForDefeatFigures = GameObject.Find("Square" + toMoveFigure.name[0]);
+        toMoveFigure.transform.position = fieldForDefeatFigures.transform.position;
+        toMoveFigure.name = toMoveFigure.name[0].ToString();
+        toMoveFigure.tag = "Static";
+        RaycastHit2D[] figures = Physics2D.RaycastAll(fieldForDefeatFigures.transform.position, fieldForDefeatFigures.transform.position, 0.5f); //Заготовка для счётчика
+        Debug.Log($" На поле поверженных фигур {toMoveFigure.name} = {figures.Length}");
     }
 }
