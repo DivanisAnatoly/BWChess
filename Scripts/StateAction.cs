@@ -1,0 +1,5 @@
+﻿enum StateAction
+{
+    moveBot,
+    movePlayer
+}

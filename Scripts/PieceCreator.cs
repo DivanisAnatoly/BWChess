@@ -5,13 +5,13 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 
-public class PieceCreator : MonoBehaviour
+public class PieceCreator
 {
-    private string fen = @"r111k11r/pppppppp/8/8/8/8/PPPPPPPP/R111K11R";
+    private string fen;
 
-    void Awake()
+    public PieceCreator(string fen)
     {
-        ShowFigures();
+        this.fen = fen;
     }
 
     //Разместить фигуры на доске
@@ -28,7 +28,11 @@ public class PieceCreator : MonoBehaviour
             for (int x = 0; x < 8; x++)
             {
                 figure = linesBoard[y][x];
-                if (figure == '.') continue;
+                if (figure == '.')
+                {
+                    ChessGameControl.dictionaryOfFigures.Add("" + (char)(x + 'a') + (y + 1), null);
+                    continue;
+                }
                 PlaceFigure(figure.ToString(), x, y, invertBoard);
             }
         }  
@@ -39,10 +43,10 @@ public class PieceCreator : MonoBehaviour
     {
         GameObject spriteFigure = GameObject.Find(figure);
         GameObject currentSquare = GameObject.Find("" + (char)(x + 'a') + (y + 2*invertBoard));
-        GameObject currentFigure = Instantiate(spriteFigure, currentSquare.transform.position, currentSquare.transform.rotation);
+        GameObject currentFigure = GameObject.Instantiate(spriteFigure, currentSquare.transform.position, currentSquare.transform.rotation);
         currentFigure.name = spriteFigure.name + currentSquare.name;
         Debug.Log($" Создан клон фигуры {currentFigure.name[0]}");
-
+        ChessGameControl.dictionaryOfFigures.Add(currentSquare.name, currentFigure);
         currentFigure.tag = "Active";
     }
 
@@ -62,7 +66,7 @@ public class PieceCreator : MonoBehaviour
         GameObject board = GameObject.Find("Board");
         GameObject instanteSquare = GameObjects.CentreSquareOnBoard();
         Vector3 positionSquare = new Vector3(instanteSquare.transform.position.x + x * 53.62f, instanteSquare.transform.position.y + y * 53.62f, 0f);
-        GameObject currentSquare = Instantiate(instanteSquare, positionSquare, instanteSquare.transform.rotation, board.transform);
+        GameObject currentSquare = GameObject.Instantiate(instanteSquare, positionSquare, instanteSquare.transform.rotation, board.transform);
         currentSquare.name = "" + (char)(x + 'a') + (y + 1);
     }
 
