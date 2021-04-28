@@ -110,14 +110,17 @@ namespace Visualizator3000
                     moveToSquare = ("" + (char)('a' + x) + (y + 1)).ToString();
                     move = (piece + pieceSquare + moveToSquare);
 
-                    if (pieceMovesList.Exists(item => item.Contains(move)))
-                        if (gameManager.GetFigureAt(x, y) == '.') text += "o ";
-                        else
-                        {
-                            if (pieceMovesList.Exists(item => item == (move + "Q")) ||
-                                pieceMovesList.Exists(item => item == (move + "q"))) text += "? ";
-                            else text += "x ";
+                    if (pieceMovesList.Exists(item => item.Contains(move))) 
+                    {
+                        if (pieceMovesList.Exists(item => item == (move + "Q")) ||
+                                pieceMovesList.Exists(item => item == (move + "q"))) 
+                        { 
+                            text += "? ";
+                            continue;
                         }
+                        
+                        text += (gameManager.GetFigureAt(x, y) == '.') ? "o " : "x ";
+                    }  
                     else
                         text += gameManager.GetFigureAt(x, y) + " ";
                 }

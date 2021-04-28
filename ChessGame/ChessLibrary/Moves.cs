@@ -17,6 +17,9 @@ namespace ChessLibrary
         private readonly Desk desk;
         private Color inGameColor;
 
+        private string EnPassant;
+        private string lastMoveEnPassant = "-";
+
         public Moves(Desk desk)
         {
             this.desk = desk;
@@ -78,6 +81,8 @@ namespace ChessLibrary
         {
             RecalculatedPiecesPosition.Clear();
 
+            EnPassant = desk.notation.EnPassant;
+
             inGameColor = desk.notation.InGameColor;
 
             List<Vectors> activePlayerMoves = (inGameColor == Color.white) ? whiteMoves : blackMoves; ;
@@ -121,6 +126,8 @@ namespace ChessLibrary
                 vector.avaibleSquares.RemoveAll(item => IsMateAfterMove((char)vector.vectorPieceKey + vector.startPosition + item));
             CheckCastling(inGameColor);
             CheckCastling(inGameColor.FlipColor());
+
+            lastMoveEnPassant = EnPassant;
         }
 
 
@@ -164,7 +171,7 @@ namespace ChessLibrary
             for (int i = 0; i < activePlayerMoves.Count; i++)
             {
                 string vectorStartPosition = activePlayerMoves[i].startPosition;
-                if (InvalidVector(activePlayerMoves[i], from, to) || KingGuardsPiecesPosition.Exists(item => item == vectorStartPosition))
+                if (InvalidVector(activePlayerMoves[i], from, to) || KingGuardsPiecesPosition.Exists(item => item == vectorStartPosition) || activePlayerMoves[i].avaibleSquares.Exists(item => item == lastMoveEnPassant))
                     activePlayerMoves[i] = RecalculateVector(activePlayerMoves[i]);
             }
 
@@ -172,7 +179,7 @@ namespace ChessLibrary
             for (int i = 0; i < waitingPlayerMoves.Count; i++)
             {
                 string vectorStartPosition = waitingPlayerMoves[i].startPosition;
-                if (InvalidVector(waitingPlayerMoves[i], from, to) || KingGuardsPiecesPosition.Exists(item => item == vectorStartPosition))
+                if (InvalidVector(waitingPlayerMoves[i], from, to) || KingGuardsPiecesPosition.Exists(item => item == vectorStartPosition) || waitingPlayerMoves[i].avaibleSquares.Exists(item => item == lastMoveEnPassant))
                     waitingPlayerMoves[i] = RecalculateVector(waitingPlayerMoves[i]);
             }
 
@@ -192,12 +199,13 @@ namespace ChessLibrary
         //Проверка на невалидность вектора
         internal bool InvalidVector(Vectors vector, string from, string to)
         {
-            string EnPassant = desk.notation.EnPassant;
-            if (vector.occupiedSquares.Exists(item => item == from) || vector.occupiedSquares.Exists(item => item == to)
-                || vector.avaibleSquares.Exists(item => item == from) || vector.avaibleSquares.Exists(item => item == to))
+            if (vector.occupiedSquares.Exists(item => item.Contains(from)) || vector.occupiedSquares.Exists(item => item.Contains(to))
+                || vector.avaibleSquares.Exists(item => item.Contains(from)) || vector.avaibleSquares.Exists(item => item.Contains(to)))
                 return true;
+            
             if (EnPassant != "-" && vector.vectorPieceKey == (inGameColor == Color.white ? whitePawn : blackPawn)
                 && vector.occupiedSquares.Exists(item => item == EnPassant)) return true;
+
             return false;
         }
 
@@ -206,7 +214,6 @@ namespace ChessLibrary
         public bool IsMateAfterMove(string move)
         {
             bool result;
-            //Color inGameColor = desk.notation.InGameColor;
             PieceMove pieceMove = new PieceMove(inGameColor, move);
             ForsythEdwardsNotation copyN = (ForsythEdwardsNotation)desk.notation.Clone();
             Desk copyDesk = new Desk(copyN);

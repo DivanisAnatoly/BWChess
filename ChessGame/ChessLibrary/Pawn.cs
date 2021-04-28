@@ -9,7 +9,7 @@ namespace ChessLibrary
     class Pawn : Piece
     {
         readonly int stepY;
-        
+        bool CanJump;
 
         internal Pawn(PiecesKeys pieceKey, Color pieceColor) : base(pieceKey, pieceColor)
         {
@@ -19,62 +19,64 @@ namespace ChessLibrary
 
         internal override Square[,] CanFigureMove(Square[,] avaibleSquares, Desk desk, Square ownSquare)
         {
-            bool CanJump;
-
-
-            //пешки не могут ходить на 1-ой и 8-ой горизонтали (края доски)
-            if (ownSquare.y < 1 || ownSquare.y > 6)
-            {
-                for (int y = 7; y >= 0; y--)
-                    for (int x = 0; x < 8; x++)
-                        avaibleSquares[x, y] = Square.none;
-
-                return avaibleSquares;
-            }
 
             //пешки ходят на два хода только со своей начальной горизонтали(2-я для белыхых, 7-я для черных)
-            CanJump = (ownSquare.y == 1 || ownSquare.y == 6);
+            CanJump = ((ownSquare.y == 1 && pieceKey == PiecesKeys.whitePawn) || (ownSquare.y == 6 && pieceKey == PiecesKeys.blackPawn));
 
-            //очень сложный просчет доступных ходов 
+            Piece pieceOnSquare;
+            int absDeltaX, deltaY;
+
+
             foreach (Square square in avaibleSquares)
             {
-                if (square == ownSquare) { avaibleSquares[square.x, square.y] = Square.none; continue; }
+                pieceOnSquare = desk.deskSquares[square.x, square.y].ownedPiece;
+                absDeltaX = ownSquare.AbsDeltaX(square);
+                deltaY = ownSquare.DeltaY(square);
 
-                if (ownSquare.DeltaY(square) == stepY)
+
+                if (CanJump && absDeltaX == 0 && deltaY == 2 * stepY)
                 {
-                    if (ownSquare.AbsDeltaX(square) == 0)
+                    if (desk.deskSquares[square.x, square.y - stepY].ownedPiece != Piece.nullPiece)
                     {
-                        if (desk.deskSquares[square.x, square.y].ownedPiece != Piece.nullPiece)
-                        {
-                            avaibleSquares[square.x, square.y] = Square.none;
-                            movesVector.occupiedSquares.Add(square.Name);
-                        }
+                        avaibleSquares[square.x, square.y] = Square.none;
                         continue;
                     }
-                    if (ownSquare.AbsDeltaX(square) == 1)
-                    {
-                        if (desk.notation.EnPassant == square.Name) continue;
-                        if (desk.deskSquares[square.x, square.y].ownedPiece == Piece.nullPiece || desk.deskSquares[square.x, square.y].ownedPiece.pieceColor == pieceColor)
-                        {
-                            avaibleSquares[square.x, square.y] = Square.none;
-                            movesVector.occupiedSquares.Add(square.Name);
-                        }
-                        continue;
-                    }
-                    avaibleSquares[square.x, square.y] = Square.none;
-                    continue;
-                }
-                if (CanJump && ownSquare.AbsDeltaX(square) == 0 && ownSquare.DeltaY(square) == stepY * 2)
-                {
-                    if (desk.deskSquares[square.x, square.y].ownedPiece != Piece.nullPiece || desk.deskSquares[square.x, square.y - stepY].ownedPiece != Piece.nullPiece)
+
+                    if (pieceOnSquare != Piece.nullPiece)
                     {
                         movesVector.occupiedSquares.Add(square.Name);
                         avaibleSquares[square.x, square.y] = Square.none;
+                        continue;
                     }
+
                     continue;
                 }
 
-                avaibleSquares[square.x, square.y] = Square.none;
+
+                if (deltaY == stepY && absDeltaX <= 1)
+                {
+                    if (absDeltaX == 0)
+                    {
+                        if (pieceOnSquare == Piece.nullPiece) continue;
+
+                        movesVector.occupiedSquares.Add(square.Name);
+                        avaibleSquares[square.x, square.y] = Square.none;
+                    }
+                    else
+                    {
+                        if (desk.notation.EnPassant == square.Name && desk.notation.InGameColor == pieceColor) continue;
+                        if (pieceOnSquare.pieceColor != pieceColor.FlipColor())
+                        {
+                            movesVector.occupiedSquares.Add(square.Name);////////////////////
+                            avaibleSquares[square.x, square.y] = Square.none;
+                        }
+                    }
+
+                    continue;
+                }
+                else
+                    avaibleSquares[square.x, square.y] = Square.none;
+
             }
 
             return avaibleSquares;

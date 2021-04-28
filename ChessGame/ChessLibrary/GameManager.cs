@@ -15,7 +15,7 @@ namespace ChessLibrary
         Desk desk;
 
         //Начать партию(начальные условия в json строке)
-        public void StartGame(string fen = @"{ 'PiecePosition': 'rnbqkbnr/pppppppp/1P1P1P1P/8/2B5/3B4/PPPPPPPP/RNBQK2R','InGameColor':'black','Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }", string playerColor="none")
+        public void StartGame(string fen = @"{ 'PiecePosition': 'rnbqkbnr/1ppppppp/8/pP1P1P1P/2B5/3B4/8/RNBQK2R','InGameColor':'white','Castling': 'KQkq','EnPassant': 'a6','HalfMoveClock': 0,'MoveNumber': 1 }", string playerColor="none")
         {
             Color color = Color.none;
             if (playerColor == "white" || playerColor == "White") color = Color.white;
