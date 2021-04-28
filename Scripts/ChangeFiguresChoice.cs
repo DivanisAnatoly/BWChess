@@ -12,9 +12,9 @@ public class ChangeFiguresChoice : MonoBehaviour
         children = new List<GameObject> { };
         int counter = 0;
         // —охран€ю найденных потомков в лист
-        foreach (GameObject child in personalChoice.GetComponentInChildren<Transform>())
+        foreach (Transform child in personalChoice.GetComponentInChildren<Transform>())
         {
-            children.Add(child);
+            children.Add(child.gameObject);
             counter++;
         }
         Debug.Log("Clidren counter = " +  counter);

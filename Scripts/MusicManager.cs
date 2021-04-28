@@ -5,30 +5,33 @@ using UnityEngine.UI;
 
 public class MusicManager : MonoBehaviour
 {
-    bool musicIsPlaying = true;
+    static bool musicIsPlaying = true;
     public GameObject speaker;
     public Sprite SpeakerOn;
     public Sprite SpeakerOff;
+    GameObject audioSourse;
     // Start is called before the first frame update
     void Start()
     {
-        //speaker.GetComponent<AudioSource>().Play();
+        audioSourse = GameObject.Find("AudioSource");
+        if (!MusicManager.musicIsPlaying) speaker.GetComponent<Image>().sprite = SpeakerOff;
+        else speaker.GetComponent<Image>().sprite = SpeakerOn;
     }
 
     public void SwitchMusic()
     {
-        GameObject audioSourse = GameObject.Find("AudioSource");
-        if (!musicIsPlaying)
+        
+        if (!MusicManager.musicIsPlaying)
         {
             audioSourse.GetComponent<AudioSource>().Play();
             speaker.GetComponent<Image>().sprite = SpeakerOn;
 
         }
-        else if (musicIsPlaying)
+        else if (MusicManager.musicIsPlaying)
         {
             audioSourse.GetComponent<AudioSource>().Pause(); 
             speaker.GetComponent<Image>().sprite = SpeakerOff;
         }
-        musicIsPlaying = !musicIsPlaying;
+        MusicManager.musicIsPlaying = !MusicManager.musicIsPlaying;
     }
 }
