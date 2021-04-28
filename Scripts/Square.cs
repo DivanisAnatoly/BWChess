@@ -6,61 +6,44 @@ public class Square
 {
 
     //Подсветка клеток
-    public void HighlightSquare(GameObject clickedItem, List<Parser> parser)
+    public void HighlightSquare(GameObject clickedFigure, List<Parser> parser)
     {
         Constraints constraints = new Constraints();
+        GameObject objectOnTheWay;
         foreach (Parser currentMove in parser)
         {
-            Transform itemToMove = Clicks.GetItemAt(currentMove.SquareToMove.transform.position);  //Объект, который может существовать
-            if (clickedItem.name == currentMove.Name.name)
+            objectOnTheWay = ChessGameControl.dictionaryOfFigures[currentMove.SquareToMove.name];  //Объект, который может существовать
+            if (objectOnTheWay && constraints.CheckEnemyFigure(objectOnTheWay, clickedFigure))
             {
-                if (itemToMove && constraints.CheckEnemyFigure(itemToMove, clickedItem))
-                {
-                    PlaceAMSquare(currentMove.SquareToMove, "Attack");
-                    currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-                }
-                else
-                    currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                PlaceAMSquare(currentMove.SquareToMove, "Attack");
+                currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
             }
-
+            else
+                currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
         }
         return;
     }
 
-    //Изменение цвета клетки
-    public void ReverseColorSquare(GameObject toMoveSquare, List<Parser> parser, out TypesOfMove typeMove)
+    //Изменение цвета клетки в исходное состояние и установка прозрачности клеток
+    public bool ReverseColorSquare(GameObject clickedSquare, List<Parser> parser)
     {
-        typeMove = TypesOfMove.Null;
-        Color colorSquare = new Color(1f, 1f, 1f, 1f);
+        
+        bool checkVar = false;
+        if (clickedSquare && clickedSquare.GetComponent<SpriteRenderer>().color == new Color(1f, 1f, 1f, 1f)) 
+            checkVar = true;
         foreach (Parser currentMove in parser)
-        {
-            if (toMoveSquare == currentMove.SquareToMove && toMoveSquare.GetComponent<SpriteRenderer>().color == colorSquare)
-            {
-                typeMove = TypesOfMove.Normal;
-                if ((currentMove.Name.name[0] == 'P' && currentMove.SquareToMove.name[1] == '8') ||
-                    currentMove.Name.name[0] == 'p' && currentMove.SquareToMove.name[1] == '1')
-                    typeMove = TypesOfMove.Transform;
-                else if (currentMove.Name.name == "Ke1" && currentMove.SquareToMove.name == "g1" || 
-                    currentMove.Name.name == "ke8" && currentMove.SquareToMove.name == "g8")
-                {
-                    typeMove = TypesOfMove.SCastling;
-                }
-                else if (currentMove.Name.name == "Ke1" && currentMove.SquareToMove.name == "c1" || 
-                    currentMove.Name.name == "ke8" && currentMove.SquareToMove.name == "c8")
-                {
-                    typeMove = TypesOfMove.LCastling;
-                }
-            }
+        {   
             PlaceAMSquare(currentMove.SquareToMove, "Movement");
             currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
         }
-        return;
+        Debug.Log(checkVar);
+        return checkVar;
     }
 
     //Меняет спрайт указанной клетки на указанный спрайт, обычно используется для замены Attack/Movement спрайта
-    static public void PlaceAMSquare(GameObject goSquare, string spriteName)
+    static public void PlaceAMSquare(GameObject square, string spriteName)
     {
         GameObject Sprite = GameObject.Find(spriteName);
-        goSquare.GetComponent<SpriteRenderer>().sprite = Sprite.GetComponent<SpriteRenderer>().sprite;
+        square.GetComponent<SpriteRenderer>().sprite = Sprite.GetComponent<SpriteRenderer>().sprite;
     }
 }

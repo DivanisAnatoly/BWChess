@@ -11,36 +11,43 @@ public class TransformFigure
         RaycastHit2D[] figures = Physics2D.RaycastAll(clickPosition, clickPosition, 0.5f);
         if (figures.Length != 0 && figures[0].transform.gameObject.tag == "Static")
         {
-            nameTransformFigure = TransformPawn(pawnFigure, figures[0].transform);
+            GameObject gameObject = GameObject.Instantiate(figures[0].transform.gameObject, figures[0].transform.position, figures[0].transform.rotation);
+            nameTransformFigure = TransformPawn(pawnFigure, gameObject);
             return true;
         }
         nameTransformFigure = null;
         return false;
     }
 
-    public string TransformPawn(GameObject pawn, Transform figureFromTransformField)
+    public string TransformPawn(GameObject pawn, GameObject figureFromTransformField)
     {
         // ---------------------------------------
         // Здесь должно выезжать окно с фигурами
         // ---------------------------------------
         //FigureField figureField = new FigureField();        // Создание поля для выбора фигуры
-
-        figureFromTransformField.position = pawn.transform.position;
-        figureFromTransformField.name += pawn.name.Substring(1);
+        figureFromTransformField.transform.position = pawn.transform.position;
+        ChessGameControl.dictionaryOfFigures[pawn.name.Substring(1)] = figureFromTransformField;
+        figureFromTransformField.name = figureFromTransformField.name[0].ToString() + pawn.name.Substring(1);
+      
         pawn.transform.position = GameObject.Find("Square" + pawn.name[0]).transform.position;
         pawn.tag = "Static";
+        pawn.name = pawn.name[0].ToString();
         figureFromTransformField.tag = "Active";
-        return figureFromTransformField.name.Substring(0, 1);
+        return figureFromTransformField.name[0].ToString();
 
     }
 
-    public Vector3 IncreaseFigure(Vector3 localScale)
+    //Увеличение размеров фигуры
+    public void IncreaseFigure(GameObject currentFigure) 
     {
-        return new Vector3(localScale.x + 3, localScale.y + 3, 0f);
+        currentFigure.transform.localScale = new Vector3(currentFigure.transform.localScale.x + 3,
+                                                       currentFigure.transform.localScale.y + 3, 0f);
     }
 
-    public Vector3 DecreaseFigure(Vector3 localScale)
+    //Уменьшение размеров фигуры
+    public void DecreaseFigure(GameObject currentFigure)
     {
-        return new Vector3(localScale.x - 3, localScale.y - 3, 0f);
+        currentFigure.transform.localScale = new Vector3(currentFigure.transform.localScale.x - 3,
+                                                       currentFigure.transform.localScale.y - 3, 0f);
     }
 }
