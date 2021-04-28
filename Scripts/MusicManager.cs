@@ -17,15 +17,16 @@ public class MusicManager : MonoBehaviour
 
     public void SwitchMusic()
     {
+        GameObject audioSourse = GameObject.Find("AudioSource");
         if (!musicIsPlaying)
         {
-            //speaker.GetComponent<AudioSource>().Play();
+            audioSourse.GetComponent<AudioSource>().Play();
             speaker.GetComponent<Image>().sprite = SpeakerOn;
 
         }
         else if (musicIsPlaying)
         {
-            //speaker.GetComponent<AudioSource>().Pause();
+            audioSourse.GetComponent<AudioSource>().Pause(); 
             speaker.GetComponent<Image>().sprite = SpeakerOff;
         }
         musicIsPlaying = !musicIsPlaying;
