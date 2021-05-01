@@ -36,7 +36,6 @@ public class Square
             PlaceAMSquare(currentMove.SquareToMove, "Movement");
             currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
         }
-        Debug.Log(checkVar);
         return checkVar;
     }
 

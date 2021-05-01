@@ -101,7 +101,7 @@ public class PieceM
 
     private void TransformPiece(GameObject pawnFigure)
     {
-        if (transformFigure.GetFigureFromTransformField(pawnFigure, out string nameTransformFigure))  //Требует подключение всплывающего окна
+        if (transformFigure.GetFigureFromTransformField(pawnFigure, gameManager, out string nameTransformFigure))       //Требует подключение всплывающего окна
         {
             newPawn += nameTransformFigure;
             FlipMovePlayerVsBot(newPawn);
@@ -112,13 +112,15 @@ public class PieceM
     private void BotMove()
     {
         gameManager.BotMove();
+        Debug.Log("Бот сделал ход " + gameManager.GetLastMove());
         GenerateFigureMove(new Parser(gameManager.GetLastMove(), gameManager.GetOpponentColor()));
     }
 
     private bool CheckObjectOnProbablyMove(GameObject clickedObject)
     {
+        string InGameColor = gameManager.GetInGameColor();
         if (clickedObject != null)
-            if (constraints.CheckColorFigure(clickedObject, gameManager.GetInGameColor()))
+            if (Constraints.CheckColorFigure(clickedObject, gameManager) != null)
                 return true;
         return false;
     }
@@ -205,7 +207,7 @@ public class PieceM
 
     private void TryGenerateEnPassan(Parser chessMove)
     {
-        notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(gameManager.GetGameFen());
+        notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(gameManager.GetGameFen());   //Бот ходит цветом опонента
         if (notation.EnPassant == "-") return;
         string squarePawnForKilledW = notation.EnPassant[0].ToString() + (char)(notation.EnPassant[1] + 1);
         string squarePawnForKilledB = notation.EnPassant[0].ToString() + (char)(notation.EnPassant[1] - 1);
@@ -239,6 +241,7 @@ public class PieceM
             GameObject spriteFigure = GameObject.Find(chessMove.PossibilityTransform.ToString());
             GameObject transformPawn = GameObject.Instantiate(spriteFigure, chessMove.Name.transform.position, chessMove.Name.transform.rotation);
             transformFigure.TransformPawn(chessMove.Name, transformPawn);
+            FlipMovePlayerVsBot(chessMove.chessmove);
             return true;
         }
         return false;
@@ -255,6 +258,7 @@ public class PieceM
         if (typeOfGame == TypeOfGame.PlayerVsBot && stateAction == StateAction.movePlayer && stateMove != StateMove.Castling)
         {
             Debug.Log("FLIP");
+            Debug.Log("Игрок сделал ход " + chessMove);
             gameManager.PlayerMove(chessMove);
             stateAction = StateAction.moveBot;
             stateMove = StateMove.pick;

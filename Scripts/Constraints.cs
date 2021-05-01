@@ -59,12 +59,12 @@ public class Constraints
         }
     }
 
-    public bool CheckColorFigure(GameObject ClickObject, string InGameColor)
+    public static string CheckColorFigure(GameObject ClickObject, GameManager gameManager)
     {
-        if ((ClickObject.name[0] >= 'A' && ClickObject.name[0] <= 'Z' && InGameColor == "white") ||
-           (ClickObject.name[0] >= 'a' && ClickObject.name[0] <= 'z' && InGameColor == "black"))
-            return true;
-        return false;
+        string InGameColor = gameManager.GetInGameColor();
+        if (ClickObject.name[0] >= 'A' && ClickObject.name[0] <= 'Z' && InGameColor == "white") return "white";
+        else if (ClickObject.name[0] >= 'a' && ClickObject.name[0] <= 'z' && InGameColor == "black") return "black";
+        return null;
     }
 
     public void GetClickSquare(Vector2 coordClick, out GameObject clickedSquare)

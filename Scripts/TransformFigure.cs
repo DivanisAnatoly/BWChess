@@ -1,15 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ChessLibrary;
 
 public class TransformFigure
 {
     //Получить фигуру из окна возможных фигур
-    public bool GetFigureFromTransformField(GameObject pawnFigure, out string nameTransformFigure)
+    public bool GetFigureFromTransformField(GameObject pawnFigure, GameManager gameManager, out string nameTransformFigure)
     {
         Vector2 clickPosition = Clicks.GetClickPosition();
         RaycastHit2D[] figures = Physics2D.RaycastAll(clickPosition, clickPosition, 0.5f);
-        if (figures.Length != 0 && figures[0].transform.gameObject.tag == "Static")
+        if (figures.Length != 0 && figures[0].transform.gameObject.tag == "Static" && 
+            Constraints.CheckColorFigure(figures[0].transform.gameObject, gameManager) != null)
         {
             GameObject gameObject = GameObject.Instantiate(figures[0].transform.gameObject, figures[0].transform.position, figures[0].transform.rotation);
             nameTransformFigure = TransformPawn(pawnFigure, gameObject);
