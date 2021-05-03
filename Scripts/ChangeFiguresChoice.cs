@@ -2,13 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
 public class ChangeFiguresChoice : MonoBehaviour
 {
-    bool choiceMenuIsOpen = true;
-    public GameObject personalChoice;
-    List<GameObject> children;
+    static bool choiceMenuIsOpen = true;
+    static public GameObject personalChoice;
+    static public List<GameObject> children;
+    static public string yourChoice = null;
+
     void Start()
     {
+        personalChoice = GameObject.Find("PersonalChoice");
         children = new List<GameObject> { };
         int counter = 0;
         // Сохраняю найденных потомков в лист
@@ -21,23 +25,17 @@ public class ChangeFiguresChoice : MonoBehaviour
         personalChoice.SetActive(false);
 
     }
+
     // Открываем и закрываем по кнопке окно с выбором фигур
     // Вызвыаем этот метод в месте, когда идет проверка на достижение последнего ряда доски для пешки,
     // Чтобы корректно работало надо будет кнопку со сцены удалить
-    public void OpenPersonalChoice(GameObject personalChoice)
+    public static void OpenPersonalChoice()
     {
         if (choiceMenuIsOpen)
         {
             personalChoice.SetActive(true);
         }
         else { personalChoice.SetActive(false); }
-        foreach (GameObject child in children)
-        {
-            if (choiceMenuIsOpen)
-                child.SetActive(true);
-            else child.SetActive(false);
-            Debug.Log(child.name);
-        }
         choiceMenuIsOpen = !choiceMenuIsOpen;
     }
 
@@ -46,8 +44,8 @@ public class ChangeFiguresChoice : MonoBehaviour
     // При интеграции заменить возвращаемое значение
     public void GetPersonalChoice(GameObject currentChoice)
     {
-        Debug.Log("Selected figure - " + currentChoice.name[currentChoice.name.Length-1]);
+        yourChoice = currentChoice.name[currentChoice.name.Length-1].ToString();
         choiceMenuIsOpen = false;
-        OpenPersonalChoice(personalChoice);
+        OpenPersonalChoice();
     }
 }

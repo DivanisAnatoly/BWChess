@@ -8,21 +8,22 @@ using Newtonsoft.Json;
 
 public class ChessGameControl : MonoBehaviour
 {
-    private string fen = @"{ 'PiecePosition': '4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3','InGameColor':'white',
-                                                'Castling': '----','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }";
+    private string fen = @"{ 'PiecePosition': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR','InGameColor':'white',
+                                                'Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }";
     private PieceM pieceMoves;
     private GameManager gameManager;
     private PieceCreator pieceCreator;
     static public Dictionary<string, GameObject> dictionaryOfFigures;
+    
     TypeOfGame typeOfGame;
 
-    public ForsythEdwardsNotation notation { get; private set; }
+    public ForsythEdwardsNotation Notation { get; private set; }
 
     void Awake()
     {
-        notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(fen);
+        Notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(fen);
         dictionaryOfFigures = new Dictionary<string, GameObject>();
-        pieceCreator = new PieceCreator(notation.PiecePosition);
+        pieceCreator = new PieceCreator(Notation.PiecePosition);
         pieceCreator.ShowFigures();
         typeOfGame = TypeOfGame.PlayerVsBot;
     }
@@ -36,9 +37,9 @@ public class ChessGameControl : MonoBehaviour
 
     private void StartNewGame()
     {
-        gameManager.StartGame(fen, notation.InGameColor.ToString());
+        gameManager.StartGame(fen, Notation.InGameColor.ToString());
         typeOfGame = TypeOfGame.PlayerVsBot;
-        pieceMoves = new PieceM(gameManager, typeOfGame, notation);
+        pieceMoves = new PieceM(gameManager, typeOfGame, Notation);
     }
 
     // Update is called once per frame

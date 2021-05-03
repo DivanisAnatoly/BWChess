@@ -1,5 +1,6 @@
 ﻿enum StateAction
 {
     moveBot,
-    movePlayer
+    movePlayer,
+    endGame
 }

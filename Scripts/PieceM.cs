@@ -24,6 +24,7 @@ public class PieceM
     private TeamColor teamColor;
     private TypeOfGame typeOfGame;
 
+
     public PieceM(GameManager gameManager, TypeOfGame typeOfGame, ForsythEdwardsNotation notation)
     {
         constraints = new Constraints();
@@ -34,6 +35,7 @@ public class PieceM
         stateAction = StateAction.movePlayer; //Кто первый ходит?
         teamColor = notation.InGameColor;
         currentFigure = null;
+     
     }
 
     public void ActionPlayerWithBot()
@@ -57,17 +59,20 @@ public class PieceM
                     break;
 
                 case StateMove.transform:
-                    if (Clicks.IsMouseButtonPressed())
+                    ChangeFiguresChoice.personalChoice.SetActive(true);
+                    if (ChangeFiguresChoice.yourChoice != null)
                     {
                         TransformPiece(currentFigure);
+                        
                     }
                     break;
             }
         }
         else if (stateAction == StateAction.moveBot)
         {
-            BotMove();
+            BotMove(); 
         }
+        else Debug.Log(gameManager.GameState());
         return;
     }
 
@@ -101,24 +106,35 @@ public class PieceM
 
     private void TransformPiece(GameObject pawnFigure)
     {
-        if (transformFigure.GetFigureFromTransformField(pawnFigure, gameManager, out string nameTransformFigure))       //Требует подключение всплывающего окна
+        if (transformFigure.GetFigureFromTransformField(pawnFigure, gameManager, out string nameTransformFigure))    
         {
             newPawn += nameTransformFigure;
             FlipMovePlayerVsBot(newPawn);
             Debug.Log(newPawn);
         }
+        ChangeFiguresChoice.yourChoice = null;
+        ChangeFiguresChoice.personalChoice.SetActive(false);
     }
 
     private void BotMove()
     {
+        if (gameManager.GameState() == "MATE\nYOU WIN!")
+        {
+            stateAction = StateAction.endGame;
+            return;
+        }
         gameManager.BotMove();
         Debug.Log("Бот сделал ход " + gameManager.GetLastMove());
         GenerateFigureMove(new Parser(gameManager.GetLastMove(), gameManager.GetOpponentColor()));
+        if (gameManager.GameState() == "MATE\nYOU LOSE!")
+        {
+            stateAction = StateAction.endGame;
+            return;
+        }
     }
 
     private bool CheckObjectOnProbablyMove(GameObject clickedObject)
     {
-        string InGameColor = gameManager.GetInGameColor();
         if (clickedObject != null)
             if (Constraints.CheckColorFigure(clickedObject, gameManager) != null)
                 return true;

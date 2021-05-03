@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using ChessLibrary;
+using UnityEngine.UI;
 
 public class Constraints
 {
@@ -85,7 +86,13 @@ public class Constraints
         toMoveFigure.transform.position = fieldForDefeatFigures.transform.position;
         toMoveFigure.name = toMoveFigure.name[0].ToString();
         toMoveFigure.tag = "Static";
-        RaycastHit2D[] figures = Physics2D.RaycastAll(fieldForDefeatFigures.transform.position, fieldForDefeatFigures.transform.position, 0.5f); //Заготовка для счётчика
-        Debug.Log($" На поле поверженных фигур {toMoveFigure.name} = {figures.Length}");
+        RaycastHit2D[] figures = Physics2D.RaycastAll(fieldForDefeatFigures.transform.position, fieldForDefeatFigures.transform.position, 0.5f); 
+        ChangeCounterFigure(toMoveFigure, figures.Length);
+    }
+
+    void ChangeCounterFigure(GameObject defeatFigure, int countFigureOnDefeatField)
+    {
+        GameObject defeatField = GameObject.Find(defeatFigure.name + "GraveCounter");
+        defeatField.GetComponent<Text>().text = "x" + countFigureOnDefeatField.ToString();
     }
 }

@@ -8,13 +8,12 @@ public class TransformFigure
     //Получить фигуру из окна возможных фигур
     public bool GetFigureFromTransformField(GameObject pawnFigure, GameManager gameManager, out string nameTransformFigure)
     {
-        Vector2 clickPosition = Clicks.GetClickPosition();
-        RaycastHit2D[] figures = Physics2D.RaycastAll(clickPosition, clickPosition, 0.5f);
-        if (figures.Length != 0 && figures[0].transform.gameObject.tag == "Static" && 
-            Constraints.CheckColorFigure(figures[0].transform.gameObject, gameManager) != null)
+        GameObject choiceFigure = GameObject.Find(ChangeFiguresChoice.yourChoice);
+        if (choiceFigure && choiceFigure.tag == "Static" && 
+            Constraints.CheckColorFigure(choiceFigure, gameManager) != null)
         {
-            GameObject gameObject = GameObject.Instantiate(figures[0].transform.gameObject, figures[0].transform.position, figures[0].transform.rotation);
-            nameTransformFigure = TransformPawn(pawnFigure, gameObject);
+            GameObject newGameObject = GameObject.Instantiate(choiceFigure, choiceFigure.transform.position, choiceFigure.transform.rotation);
+            nameTransformFigure = TransformPawn(pawnFigure, newGameObject);
             return true;
         }
         nameTransformFigure = null;
@@ -23,10 +22,6 @@ public class TransformFigure
 
     public string TransformPawn(GameObject pawn, GameObject figureFromTransformField)
     {
-        // ---------------------------------------
-        // Здесь должно выезжать окно с фигурами
-        // ---------------------------------------
-        //FigureField figureField = new FigureField();        // Создание поля для выбора фигуры
         figureFromTransformField.transform.position = pawn.transform.position;
         ChessGameControl.dictionaryOfFigures[pawn.name.Substring(1)] = figureFromTransformField;
         figureFromTransformField.name = figureFromTransformField.name[0].ToString() + pawn.name.Substring(1);
