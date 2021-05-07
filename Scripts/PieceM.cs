@@ -59,18 +59,17 @@ public class PieceM
                     break;
 
                 case StateMove.transform:
-                    ChangeFiguresChoice.personalChoice.SetActive(true);
+                    SetTransformField();  //Делает активным нужное поле
                     if (ChangeFiguresChoice.yourChoice != null)
                     {
-                        TransformPiece(currentFigure);
-                        
+                        TransformPiece(currentFigure);                        
                     }
                     break;
             }
         }
         else if (stateAction == StateAction.moveBot)
         {
-            BotMove(); 
+            BotMove();
         }
         else Debug.Log(gameManager.GameState());
         return;
@@ -113,9 +112,11 @@ public class PieceM
             Debug.Log(newPawn);
         }
         ChangeFiguresChoice.yourChoice = null;
-        ChangeFiguresChoice.personalChoice.SetActive(false);
+        ChangeFiguresChoice.personalChoiceW.SetActive(false);
+        ChangeFiguresChoice.personalChoiceB.SetActive(false);
     }
 
+    //Ход бота
     private void BotMove()
     {
         if (gameManager.GameState() == "MATE\nYOU WIN!")
@@ -131,6 +132,12 @@ public class PieceM
             stateAction = StateAction.endGame;
             return;
         }
+    }
+
+    private void SetTransformField()
+    {
+        if (gameManager.GetInGameColor() == "white") ChangeFiguresChoice.personalChoiceW.SetActive(true);
+        else ChangeFiguresChoice.personalChoiceB.SetActive(true);
     }
 
     private bool CheckObjectOnProbablyMove(GameObject clickedObject)
