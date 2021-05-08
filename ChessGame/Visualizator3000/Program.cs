@@ -35,6 +35,7 @@ namespace Visualizator3000
 
                 Console.WriteLine("\n-Player color:" + gameManager.GetMyColor() + "\n");
                 Console.WriteLine("-Last move(" + gameManager.GetOpponentColor() + "):" + gameManager.GetLastMove() + "\n");
+                Console.WriteLine("-Killed on last move:" + gameManager.LastTurnKilled() + "\n");
 
                 List<string> recalculatedPieces = gameManager.RecalculatedPieces();
                 Console.WriteLine("-Number of recalculated vectors : " + recalculatedPieces.Count());

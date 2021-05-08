@@ -135,5 +135,12 @@ namespace ChessLibrary
         public List<string> RecalculatedPieces() { return new List<string>(moves.RecalculatedPiecesPosition); }
 
 
+        public string LastTurnKilled() {
+            string squareName = desk.curKilledPieceSquare;
+            if(squareName == "none") return squareName;
+            return desk.deadPieces.Last() + squareName;
+        }
+
+
     }
 }

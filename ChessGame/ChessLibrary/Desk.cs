@@ -13,7 +13,7 @@ namespace ChessLibrary
         internal Piece[,] pieces = new Piece[8, 8];
         internal Square[,] deskSquares = new Square[8, 8];
         internal string curKilledPieceSquare = "none";
-
+        internal List<char> deadPieces = new List<char>();
 
         //Создать доску
         internal Desk(ForsythEdwardsNotation notation)
@@ -50,7 +50,12 @@ namespace ChessLibrary
                 int toX = pieceMove.toX; int toY = pieceMove.toY;
 
                 //перемещение фигуры
-                if (pieces[toX, toY] != Piece.nullPiece) { pieces[toX, toY].movesVector.status = "delete"; curKilledPieceSquare = pieceMove.to; }
+                if (pieces[toX, toY] != Piece.nullPiece)
+                {
+                    pieces[toX, toY].movesVector.status = "delete";
+                    curKilledPieceSquare = pieceMove.to;
+                    deadPieces.Add((char)pieces[toX, toY].pieceKey);
+                }
                 pieces[toX, toY] = pieces[fromX, fromY];
                 pieces[toX, toY].movesVector.status = "recalculate";
                 pieces[toX, toY].movesVector.startPosition = pieceMove.to;
@@ -61,9 +66,10 @@ namespace ChessLibrary
                 {
                     pieces[toX, fromY].movesVector.status = "delete";
                     curKilledPieceSquare = deskSquares[toX, fromY].Name;
+                    deadPieces.Add((char)pieces[toX, fromY].pieceKey);
                     pieces[toX, fromY] = Piece.nullPiece;
                 }
-                
+
 
                 //определяем был ли совершен ход пешкой на две клетки
                 if (Math.Abs(toY - fromY) == 2 && (pieceMove.pieceKey == blackPawn || pieceMove.pieceKey == whitePawn))
@@ -72,9 +78,10 @@ namespace ChessLibrary
                     notation.EnPassant = "-";
 
                 //превращение пешки (Pe7e8N,Pa7b8Q и т.д.). Превращение фиксируется на 6-ом знаке(если оно есть)
-                if (pieceMove.promotion) {
+                if (pieceMove.promotion)
+                {
                     Piece piece = ParseToPiece(pieceMove.promotionCharKey);
-                    pieces[toX, toY] = piece; 
+                    pieces[toX, toY] = piece;
                 }
 
                 //право рокировки навсегда теряется при ходе короля
