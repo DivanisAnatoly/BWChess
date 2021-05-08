@@ -12,6 +12,7 @@ namespace ChessLibrary
         internal ForsythEdwardsNotation notation;
         internal Piece[,] pieces = new Piece[8, 8];
         internal Square[,] deskSquares = new Square[8, 8];
+        internal string curKilledPieceSquare = "none";
 
 
         //Создать доску
@@ -39,6 +40,7 @@ namespace ChessLibrary
         //Обновить инф. о положении фигур на доске (массивы фигур,клеток и взятых фигур)
         internal void UpdatePiecesOnDesk(PieceMove pieceMove, Color inGameColor)
         {
+            curKilledPieceSquare = "none";
             Square kingSq = FindKing(inGameColor);
             King k = (King)kingSq.ownedPiece;
 
@@ -48,11 +50,20 @@ namespace ChessLibrary
                 int toX = pieceMove.toX; int toY = pieceMove.toY;
 
                 //перемещение фигуры
+                if (pieces[toX, toY] != Piece.nullPiece) { pieces[toX, toY].movesVector.status = "delete"; curKilledPieceSquare = pieceMove.to; }
                 pieces[toX, toY] = pieces[fromX, fromY];
+                pieces[toX, toY].movesVector.status = "recalculate";
+                pieces[toX, toY].movesVector.startPosition = pieceMove.to;
                 pieces[fromX, fromY] = Piece.nullPiece;
 
                 //взятие на проходе
-                if ((pieceMove.pieceKey == blackPawn || pieceMove.pieceKey == whitePawn) && notation.EnPassant == deskSquares[toX, toY].Name) pieces[toX, fromY] = Piece.nullPiece;
+                if ((pieceMove.pieceKey == blackPawn || pieceMove.pieceKey == whitePawn) && notation.EnPassant == deskSquares[toX, toY].Name)
+                {
+                    pieces[toX, fromY].movesVector.status = "delete";
+                    curKilledPieceSquare = deskSquares[toX, fromY].Name;
+                    pieces[toX, fromY] = Piece.nullPiece;
+                }
+                
 
                 //определяем был ли совершен ход пешкой на две клетки
                 if (Math.Abs(toY - fromY) == 2 && (pieceMove.pieceKey == blackPawn || pieceMove.pieceKey == whitePawn))
@@ -61,7 +72,10 @@ namespace ChessLibrary
                     notation.EnPassant = "-";
 
                 //превращение пешки (Pe7e8N,Pa7b8Q и т.д.). Превращение фиксируется на 6-ом знаке(если оно есть)
-                if (pieceMove.promotion) pieces[toX, toY] = ParseToPiece(pieceMove.promotionCharKey);
+                if (pieceMove.promotion) {
+                    Piece piece = ParseToPiece(pieceMove.promotionCharKey);
+                    pieces[toX, toY] = piece; 
+                }
 
                 //право рокировки навсегда теряется при ходе короля
                 if ((k.shortCastling || k.longCastling) && pieceMove.pieceKey == k.pieceKey) { k.shortCastling = false; k.longCastling = false; }
@@ -81,13 +95,17 @@ namespace ChessLibrary
             UpdateDeskSquares();
         }
 
-
         //рокировка (всегда происходит на конкретных клетках, поэтому там присутствуют magic numbers)
         private void MakeCastling(King k, PieceMove pMove)
         {
-            pieces[pMove.toKX, pMove.toKY] = pieces[pMove.fromKX, pMove.fromKY]; 
+            pieces[pMove.toKX, pMove.toKY] = pieces[pMove.fromKX, pMove.fromKY];
+            pieces[pMove.toKX, pMove.toKY].movesVector.status = "recalculate";
+            pieces[pMove.toKX, pMove.toKY].movesVector.startPosition = pMove.toK;
             pieces[pMove.fromKX, pMove.fromKY] = Piece.nullPiece;
-            pieces[pMove.toRX, pMove.toRY] = pieces[pMove.fromRX, pMove.fromRY]; 
+
+            pieces[pMove.toRX, pMove.toRY] = pieces[pMove.fromRX, pMove.fromRY];
+            pieces[pMove.toRX, pMove.toRY].movesVector.status = "recalculate";
+            pieces[pMove.toRX, pMove.toRY].movesVector.startPosition = pMove.toR;
             pieces[pMove.fromRX, pMove.fromRY] = Piece.nullPiece;
 
             k.shortCastling = false; k.longCastling = false;

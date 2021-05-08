@@ -9,8 +9,8 @@ namespace ChessLibrary
     using static PiecesKeys;
     abstract class Piece
     {
-        protected Vectors movesVector;
-
+        internal Vectors movesVector=new Vectors();
+        //internal Vectors movesVector
         internal readonly Color pieceColor;
         internal readonly PiecesKeys pieceKey;
         internal static Piece nullPiece = new NullPiece(none, Color.none);

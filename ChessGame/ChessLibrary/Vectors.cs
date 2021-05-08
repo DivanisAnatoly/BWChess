@@ -8,6 +8,7 @@ namespace ChessLibrary
 {
     class Vectors
     {
+        internal string status="normal";
         internal string startPosition;
         internal PiecesKeys vectorPieceKey;
         internal List<string> avaibleSquares = new List<string>();

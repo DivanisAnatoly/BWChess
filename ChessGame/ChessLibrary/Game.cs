@@ -38,7 +38,7 @@ namespace ChessLibrary
 
             player1 = new Gamer(playerColor, moves, desk);
             player2 = new Bot(playerColor.FlipColor(), moves, desk);
-            moves.UpdateMoves();
+            moves.InitMoves();
         }
 
 
