@@ -6,23 +6,32 @@ using UnityEngine.UI;
 public class ChangeFiguresChoice : MonoBehaviour
 {
     static bool choiceMenuIsOpen = true;
-    static public GameObject personalChoice;
+    static public GameObject personalChoiceW;
+    static public GameObject personalChoiceB;
     static public List<GameObject> children;
     static public string yourChoice = null;
 
     void Start()
     {
-        personalChoice = GameObject.Find("PersonalChoice");
+        personalChoiceW = GameObject.Find("PersonalChoiceW");
+        personalChoiceB = GameObject.Find("PersonalChoiceB");
         children = new List<GameObject> { };
         int counter = 0;
         // —охран€ю найденных потомков в лист
-        foreach (Transform child in personalChoice.GetComponentInChildren<Transform>())
+        foreach (Transform child in personalChoiceW.GetComponentInChildren<Transform>())
+        {
+            children.Add(child.gameObject);
+            counter++;
+        }
+
+        foreach (Transform child in personalChoiceB.GetComponentInChildren<Transform>())
         {
             children.Add(child.gameObject);
             counter++;
         }
         Debug.Log("Clidren counter = " +  counter);
-        personalChoice.SetActive(false);
+        personalChoiceW.SetActive(false);
+        personalChoiceB.SetActive(false);
 
     }
 
@@ -33,9 +42,14 @@ public class ChangeFiguresChoice : MonoBehaviour
     {
         if (choiceMenuIsOpen)
         {
-            personalChoice.SetActive(true);
+            personalChoiceW.SetActive(true);
+            personalChoiceB.SetActive(true);
         }
-        else { personalChoice.SetActive(false); }
+        else 
+        { 
+            personalChoiceW.SetActive(false);
+            personalChoiceB.SetActive(true);
+        }
         choiceMenuIsOpen = !choiceMenuIsOpen;
     }
 

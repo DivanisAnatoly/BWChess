@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 public class ChessGameControl : MonoBehaviour
 {
-    private string fen = @"{ 'PiecePosition': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR','InGameColor':'white',
+    private string fen = @"{ 'PiecePosition': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR','InGameColor':'black',
                                                 'Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }";
     private PieceM pieceMoves;
     private GameManager gameManager;
