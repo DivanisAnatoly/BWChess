@@ -194,6 +194,7 @@ namespace ChessLibrary
         {
             RecalculatedPiecesPosition.Add(vector.startPosition);
             Square pieceSqure = desk.deskSquares[vector.StartPositionX, vector.StartPositionY];
+
             return pieceSqure.ownedPiece.GetPieceMoves(desk, pieceSqure);
         }
 
@@ -202,13 +203,14 @@ namespace ChessLibrary
         internal bool InvalidVector(Vectors vector, string from, string to)
         {
             if (vector.occupiedSquares.Exists(item => item.Contains(from)) || vector.occupiedSquares.Exists(item => item.Contains(to))
-                || vector.avaibleSquares.Exists(item => item.Contains(from)) || vector.avaibleSquares.Exists(item => item.Contains(to)))
-                return true;
+                || vector.avaibleSquares.Exists(item => item.Contains(from)) || vector.avaibleSquares.Exists(item => item.Contains(to))) return true;
+
+            if (desk.notation.EnPassant != "-" && vector.vectorPieceKey == (inGameColor == Color.white ? whitePawn : blackPawn)
+                && vector.occupiedSquares.Exists(item => item == desk.notation.EnPassant)) return true;
 
             string kSquareName = desk.curKilledPieceSquare;
-            if (kSquareName != "none" && kSquareName != to && (vector.occupiedSquares.Exists(item => item.Contains(kSquareName)) 
-                || vector.avaibleSquares.Exists(item => item.Contains(kSquareName)))) 
-                return true;
+            if (kSquareName != "none" && kSquareName != to && (vector.occupiedSquares.Exists(item => item.Contains(kSquareName))
+                || vector.avaibleSquares.Exists(item => item.Contains(kSquareName)))) return true;
 
             return false;
         }

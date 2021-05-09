@@ -64,7 +64,11 @@ namespace ChessLibrary
                     }
                     else
                     {
-                        if (desk.notation.EnPassant == square.Name && desk.notation.InGameColor == pieceColor) continue;
+                        if (desk.notation.EnPassant == square.Name && desk.notation.InGameColor == pieceColor) 
+                        { 
+                            movesVector.status = "recalculate"; 
+                            continue; 
+                        }
                         if (pieceOnSquare.pieceColor != pieceColor.FlipColor())
                         {
                             movesVector.occupiedSquares.Add(square.Name);////////////////////
