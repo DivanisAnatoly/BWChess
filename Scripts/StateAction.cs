@@ -1,4 +1,4 @@
-﻿enum StateAction
+﻿public enum StateAction
 {
     moveBot,
     movePlayer,

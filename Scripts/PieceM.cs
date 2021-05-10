@@ -19,7 +19,7 @@ public class PieceM
     private string newPawn;                                         //Вывод превращения пешки
 
     private StateMove stateMove;                                    //Состояние хода
-    private StateAction stateAction;                                //Кто ходит?
+    private static StateAction stateAction;                                //Кто ходит?
     private GameObject currentFigure;                               //Кликнутая фигура
     private TeamColor teamColor;
     private TypeOfGame typeOfGame;
@@ -35,7 +35,7 @@ public class PieceM
         stateAction = StateAction.movePlayer; //Кто первый ходит?
         teamColor = notation.InGameColor;
         currentFigure = null;
-     
+
     }
 
     public void ActionPlayerWithBot()
@@ -62,7 +62,7 @@ public class PieceM
                     SetTransformField();  //Делает активным нужное поле
                     if (ChangeFiguresChoice.yourChoice != null)
                     {
-                        TransformPiece(currentFigure);                        
+                        TransformPiece(currentFigure);
                     }
                     break;
             }
@@ -98,14 +98,14 @@ public class PieceM
         constraints.GetClickSquare(Clicks.GetClickPosition(), out GameObject clickedSquare);                            //Получение клетки, по которой совершён клик
         transformFigure.DecreaseFigure(currentFigure);                                                                  //Уменьшение кликнутой фигуры
         if (!square.ReverseColorSquare(clickedSquare, Parser)) clickedSquare = null;
-        if (!CheckSquareOnGenerateMove(clickedSquare)) return;                                  
+        if (!CheckSquareOnGenerateMove(clickedSquare)) return;
         GenerateFigureMove(new Parser(currentFigure.name + clickedSquare.name, gameManager.GetInGameColor()));          //Генерация хода
         CheckStatusGame();                                                                                              //Проверка статуса игры
     }
 
     private void TransformPiece(GameObject pawnFigure)
     {
-        if (transformFigure.GetFigureFromTransformField(pawnFigure, gameManager, out string nameTransformFigure))    
+        if (transformFigure.GetFigureFromTransformField(pawnFigure, gameManager, out string nameTransformFigure))
         {
             newPawn += nameTransformFigure;
             FlipMovePlayerVsBot(newPawn);
@@ -174,7 +174,7 @@ public class PieceM
     {
         Debug.Log($"Генерация {chessMove.chessmove}");
         //Проверка, на кликнутой клетке есть ли фигура и что с ней делать?
-        if (constraints.CheckTryCutFigure(ChessGameControl.dictionaryOfFigures[chessMove.SquareToMove.name], chessMove.Name))  
+        if (constraints.CheckTryCutFigure(ChessGameControl.dictionaryOfFigures[chessMove.SquareToMove.name], chessMove.Name))
         {
             chessMove.Name.transform.position = chessMove.SquareToMove.transform.position;
             ChessGameControl.dictionaryOfFigures[chessMove.SquareFromMove.name] = null;
@@ -187,7 +187,7 @@ public class PieceM
                 stateMove = StateMove.pick;
                 FlipMovePlayerVsBot(chessMove.chessmove);
                 return;
-            }  
+            }
             FlipMovePlayerVsBot(chessMove.chessmove);                       //Сюда добавлять другие возможные партии
         }
         else                                                                //Если совершён клик по союзной фигуре
@@ -212,13 +212,13 @@ public class PieceM
             stateMove = StateMove.Castling;
             GenerateFigureMove(new Parser("ra8d8", "black"));
             return true;
-        } 
+        }
         else if (chessMove == "Ke1g1")
         {
             stateMove = StateMove.Castling;
-            GenerateFigureMove(new Parser("Rh1f1", "white"));;
+            GenerateFigureMove(new Parser("Rh1f1", "white")); ;
             return true;
-        }  
+        }
         else if (chessMove == "Ke1c1")
         {
             stateMove = StateMove.Castling;
@@ -236,12 +236,12 @@ public class PieceM
         string squarePawnForKilledB = notation.EnPassant[0].ToString() + (char)(notation.EnPassant[1] - 1);
         Debug.Log(notation.InGameColor);
         if (chessMove.Name.name[0] == 'P' && chessMove.SquareToMove.name == notation.EnPassant && notation.InGameColor == TeamColor.white)
-        {   
+        {
             constraints.MovingFigureOnDefeat(ChessGameControl.dictionaryOfFigures[squarePawnForKilledB]);
             ChessGameControl.dictionaryOfFigures[squarePawnForKilledB] = null;
             Debug.Log("Пешка уничтожена");
         }
-        else if  (chessMove.Name.name[0] == 'p' && chessMove.SquareToMove.name == notation.EnPassant && notation.InGameColor == TeamColor.black)
+        else if (chessMove.Name.name[0] == 'p' && chessMove.SquareToMove.name == notation.EnPassant && notation.InGameColor == TeamColor.black)
         {
             constraints.MovingFigureOnDefeat(ChessGameControl.dictionaryOfFigures[squarePawnForKilledW]);
             ChessGameControl.dictionaryOfFigures[squarePawnForKilledB] = null;
@@ -293,5 +293,13 @@ public class PieceM
             stateMove = StateMove.pick;
             currentFigure = null;
         }
+    }
+    public static StateAction getState()
+    {
+        return stateAction;
+    }
+    public static void setState(StateAction _stateAction)
+    {
+        stateAction = _stateAction;
     }
 }

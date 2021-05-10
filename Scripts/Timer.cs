@@ -9,6 +9,7 @@ public class Timer : MonoBehaviour
     public int inputSecond; 
     
     private float timeInSecondsP;
+    private StateAction stateAction;
     public static int minutsP;
     public static int secondsP;
     public Text minutes;
@@ -21,24 +22,25 @@ public class Timer : MonoBehaviour
     }
     void Update()
     {
-        if(timeInSecondsP >= 0 ) // Дописать условие из библиотеки!!!!! Если ходит другой игрок - таймер замирает
+        stateAction = PieceM.getState();
+        if (timeInSecondsP > 0 && stateAction == StateAction.movePlayer) // Дописать условие из библиотеки!!!!! Если ходит другой игрок - таймер замирает
         {
             timeInSecondsP -= Time.deltaTime;
-            secondsP = (int)(timeInSecondsP % 60); 
-            minutsP = (int)(timeInSecondsP / 60); 
+            secondsP = (int)(timeInSecondsP % 60);
+            minutsP = (int)(timeInSecondsP / 60);
             if (minutsP < 10) // Чтобы значение <10 в строке  не теряли 0 в старшем разряде 
                 minutes.text = 0 + minutsP.ToString();
-            else 
+            else
                 minutes.text = minutsP.ToString();
             if (secondsP < 10)
-                seconds.text = 0 + secondsP.ToString(); 
+                seconds.text = 0 + secondsP.ToString();
             else
                 seconds.text = secondsP.ToString();
         }
+        else if (timeInSecondsP <= 0)
+        {
+            PieceM.setState(StateAction.endGame);
+            Debug.Log("Mate, You lose.");
+        }
     }
-    /*
-    bool isMyTurn() {
-        return () ? true : false;
-    }
-    */
  }
