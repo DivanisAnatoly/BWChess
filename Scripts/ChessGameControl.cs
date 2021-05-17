@@ -6,10 +6,11 @@ using UnityEngine.SceneManagement;
 using ChessLibrary;
 using Newtonsoft.Json;
 
+
 public class ChessGameControl : MonoBehaviour
 {
-    private string fen = @"{ 'PiecePosition': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR','InGameColor':'black',
-                                                'Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }";
+    private string fen = @"{ 'PiecePosition': '1111k111/8/8/8/p1p1p1p1/8/PPPPPPPP/R111K11R','InGameColor':'white',
+                                                'Castling': '----','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }";
     private PieceM pieceMoves;
     private GameManager gameManager;
     private PieceCreator pieceCreator;
@@ -37,7 +38,7 @@ public class ChessGameControl : MonoBehaviour
 
     private void StartNewGame()
     {
-        gameManager.StartGame(fen, Notation.InGameColor.ToString());
+        gameManager.StartGame(fen, "white");
         typeOfGame = TypeOfGame.PlayerVsBot;
         pieceMoves = new PieceM(gameManager, typeOfGame, Notation);
     }

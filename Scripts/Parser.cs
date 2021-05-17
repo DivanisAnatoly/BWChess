@@ -27,15 +27,13 @@ public struct Parser
             {
                 chessMove = "Ke1g1";
             }
-            else if (currentTeamColor == "black")
-                chessMove = "ke8g8";
+            else chessMove = "ke8g8";
         }
         else if (chessMove == "0-0-0")
         {
             if (currentTeamColor == "white")
                 chessMove = "Ke1c1";
-            else if (currentTeamColor == "black")
-                chessMove = "ke8c8";
+            else chessMove = "ke8c8";
         }
         if (chessMove.Substring(5) != "")
         {

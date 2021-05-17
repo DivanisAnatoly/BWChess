@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using ChessLibrary;
 using Newtonsoft.Json;
+using System.Threading;
 
 public class PieceM
 {
@@ -35,7 +36,7 @@ public class PieceM
         stateAction = StateAction.movePlayer; //Кто первый ходит?
         teamColor = notation.InGameColor;
         currentFigure = null;
-
+        this.notation = notation;
     }
 
     public void ActionPlayerWithBot()
@@ -69,6 +70,8 @@ public class PieceM
         }
         else if (stateAction == StateAction.moveBot)
         {
+            System.Random random = new System.Random();
+            Thread.Sleep(random.Next(400, 4000));
             BotMove();
         }
         else Debug.Log(gameManager.GameState());
@@ -86,9 +89,8 @@ public class PieceM
         foreach (string i in gameManager.GetAllAvaibleMoves(currentFigure.name.Substring(1)))
             list += " " + i;
         Debug.Log(list);
-        Debug.Log(gameManager.GetGameFen());
         transformFigure.IncreaseFigure(currentFigure);                                          //Увеличение кликнутой фигуры
-        square.HighlightSquare(currentFigure, Parser);                                          //Подсветка возможных ходов
+        square.HighlightSquare(Parser);                                                          //Подсветка возможных ходов
         stateMove = StateMove.drop;                                                             //Изменить состояние фигуры в состояние падения
         Debug.Log("pickedUp " + currentFigure.name);
     }
@@ -124,9 +126,11 @@ public class PieceM
             stateAction = StateAction.endGame;
             return;
         }
+        notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(gameManager.GetGameFen());
         gameManager.BotMove();
         Debug.Log("Бот сделал ход " + gameManager.GetLastMove());
         GenerateFigureMove(new Parser(gameManager.GetLastMove(), gameManager.GetOpponentColor()));
+        notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(gameManager.GetGameFen());
         if (gameManager.GameState() == "MATE\nYOU LOSE!")
         {
             stateAction = StateAction.endGame;
@@ -174,29 +178,20 @@ public class PieceM
     {
         Debug.Log($"Генерация {chessMove.chessmove}");
         //Проверка, на кликнутой клетке есть ли фигура и что с ней делать?
-        if (constraints.CheckTryCutFigure(ChessGameControl.dictionaryOfFigures[chessMove.SquareToMove.name], chessMove.Name))
+        constraints.CheckTryCutFigure(ChessGameControl.dictionaryOfFigures[chessMove.SquareToMove.name]);
+        chessMove.Name.transform.position = chessMove.SquareToMove.transform.position;
+        ChessGameControl.dictionaryOfFigures[chessMove.SquareFromMove.name] = null;
+        chessMove.Name.name = chessMove.Name.name[0] + chessMove.SquareToMove.name;
+        ChessGameControl.dictionaryOfFigures[chessMove.SquareToMove.name] = chessMove.Name;
+        if (CheckTransformMove(chessMove)) return;
+        TryGenerateEnPassan(chessMove);                                          //Нужно доделать
+        if (TryGenerateCastlingMove(chessMove.Name.name[0].ToString() + chessMove.SquareFromMove.name + chessMove.SquareToMove.name))
         {
-            chessMove.Name.transform.position = chessMove.SquareToMove.transform.position;
-            ChessGameControl.dictionaryOfFigures[chessMove.SquareFromMove.name] = null;
-            chessMove.Name.name = chessMove.Name.name[0] + chessMove.SquareToMove.name;
-            ChessGameControl.dictionaryOfFigures[chessMove.SquareToMove.name] = chessMove.Name;
-            if (CheckTransformMove(chessMove)) return;
-            TryGenerateEnPassan(chessMove);                                          //Нужно доделать
-            if (TryGenerateCastlingMove(chessMove.Name.name[0].ToString() + chessMove.SquareFromMove.name + chessMove.SquareToMove.name))
-            {
-                stateMove = StateMove.pick;
-                FlipMovePlayerVsBot(chessMove.chessmove);
-                return;
-            }
-            FlipMovePlayerVsBot(chessMove.chessmove);                       //Сюда добавлять другие возможные партии
-        }
-        else                                                                //Если совершён клик по союзной фигуре
-        {
-            stateAction = StateAction.movePlayer;
             stateMove = StateMove.pick;
-            currentFigure = null;
+            FlipMovePlayerVsBot(chessMove.chessmove);
             return;
         }
+        FlipMovePlayerVsBot(chessMove.chessmove);                       //Сюда добавлять другие возможные партии
     }
 
     private bool TryGenerateCastlingMove(string chessMove)
@@ -230,23 +225,23 @@ public class PieceM
 
     private void TryGenerateEnPassan(Parser chessMove)
     {
-        notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(gameManager.GetGameFen());   //Бот ходит цветом опонента
         if (notation.EnPassant == "-") return;
         string squarePawnForKilledW = notation.EnPassant[0].ToString() + (char)(notation.EnPassant[1] + 1);
         string squarePawnForKilledB = notation.EnPassant[0].ToString() + (char)(notation.EnPassant[1] - 1);
         Debug.Log(notation.InGameColor);
-        if (chessMove.Name.name[0] == 'P' && chessMove.SquareToMove.name == notation.EnPassant && notation.InGameColor == TeamColor.white)
+        if (chessMove.Name.name[0] == 'P' && chessMove.SquareToMove.name == notation.EnPassant)
         {
             constraints.MovingFigureOnDefeat(ChessGameControl.dictionaryOfFigures[squarePawnForKilledB]);
             ChessGameControl.dictionaryOfFigures[squarePawnForKilledB] = null;
             Debug.Log("Пешка уничтожена");
         }
-        else if (chessMove.Name.name[0] == 'p' && chessMove.SquareToMove.name == notation.EnPassant && notation.InGameColor == TeamColor.black)
+        else if (chessMove.Name.name[0] == 'p' && chessMove.SquareToMove.name == notation.EnPassant)
         {
             constraints.MovingFigureOnDefeat(ChessGameControl.dictionaryOfFigures[squarePawnForKilledW]);
-            ChessGameControl.dictionaryOfFigures[squarePawnForKilledB] = null;
+            ChessGameControl.dictionaryOfFigures[squarePawnForKilledW] = null;
             Debug.Log("Пешка уничтожена");
         }
+
     }
 
     private bool CheckTransformMove(Parser chessMove)
@@ -255,7 +250,7 @@ public class PieceM
             || chessMove.Name.name[0] == 'p' && chessMove.SquareToMove.name[1] == '1'))
         {
             stateMove = StateMove.transform;
-            newPawn = chessMove.chessmove;
+            newPawn = chessMove.chessmove; //Pb7b8
             Debug.Log("Кликните по нужной фигуре");
             return true;
         }

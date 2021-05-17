@@ -30,7 +30,7 @@ public class PieceCreator
                 figure = linesBoard[y][x];
                 if (figure == '.')
                 {
-                    ChessGameControl.dictionaryOfFigures.Add("" + (char)(x + 'a') + (y + 1), null);
+                    ChessGameControl.dictionaryOfFigures.Add("" + (char)(x + 'a') + (y + 2 * invertBoard), null);
                     continue;
                 }
                 PlaceFigure(figure.ToString(), x, y, invertBoard);
@@ -77,6 +77,7 @@ public class PieceCreator
         for (int j = 8; j >= 2; j--)
             newfen = newfen.Replace(j.ToString(), (j - 1).ToString() + "1");
         newfen = newfen.Replace("1", ".");
+       
         return;
     }
 

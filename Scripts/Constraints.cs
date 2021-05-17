@@ -34,30 +34,11 @@ public class Constraints
         return true;
     }
 
-    //Проверка, фигура - противник (true) или союзник (false)?
-    public bool CheckEnemyFigure(GameObject toMoveFigure, GameObject currentFigure)
-    {
-        if ((toMoveFigure.name[0] >= 'A' && toMoveFigure.name[0] <= 'Z' && currentFigure.name[0] >= 'a' && currentFigure.name[0] <= 'z') ||
-           (toMoveFigure.name[0] >= 'a' && toMoveFigure.name[0] <= 'z' && currentFigure.name[0] >= 'A' && currentFigure.name[0] <= 'Z'))
-        {
-            return true;
-        }
-        return false;
-    }
-
     //Попытка срубить фигуру, если на клетке противник - перемещение фигуры на поле поверженных фигур
-    public bool CheckTryCutFigure(GameObject toMoveFigure, GameObject currentFigure)
+    public void CheckTryCutFigure(GameObject toMoveFigure)
     {
-        if (!toMoveFigure) return true;
-        if (CheckEnemyFigure(toMoveFigure, currentFigure))
-        {
-            MovingFigureOnDefeat(toMoveFigure);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        if (!toMoveFigure) return;
+        MovingFigureOnDefeat(toMoveFigure);
     }
 
     public static string CheckColorFigure(GameObject ClickObject, GameManager gameManager)

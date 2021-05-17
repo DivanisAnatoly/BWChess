@@ -6,14 +6,13 @@ public class Square
 {
 
     //Подсветка клеток
-    public void HighlightSquare(GameObject clickedFigure, List<Parser> parser)
+    public void HighlightSquare(List<Parser> parser)
     {
-        Constraints constraints = new Constraints();
         GameObject objectOnTheWay;
         foreach (Parser currentMove in parser)
         {
             objectOnTheWay = ChessGameControl.dictionaryOfFigures[currentMove.SquareToMove.name];  //Объект, который может существовать
-            if (objectOnTheWay && constraints.CheckEnemyFigure(objectOnTheWay, clickedFigure))
+            if (objectOnTheWay)
             {
                 PlaceAMSquare(currentMove.SquareToMove, "Attack");
                 currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
@@ -27,7 +26,6 @@ public class Square
     //Изменение цвета клетки в исходное состояние и установка прозрачности клеток
     public bool ReverseColorSquare(GameObject clickedSquare, List<Parser> parser)
     {
-        
         bool checkVar = false;
         if (clickedSquare && clickedSquare.GetComponent<SpriteRenderer>().color == new Color(1f, 1f, 1f, 1f)) 
             checkVar = true;
