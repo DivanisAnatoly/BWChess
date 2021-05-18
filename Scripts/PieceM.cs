@@ -28,20 +28,35 @@ public class PieceM
 
     public PieceM(GameManager gameManager, TypeOfGame typeOfGame, ForsythEdwardsNotation notation)
     {
+        this.notation = notation;
         constraints = new Constraints();
         transformFigure = new TransformFigure();
         this.gameManager = gameManager;
         this.typeOfGame = typeOfGame;
         stateMove = StateMove.pick;
-        stateAction = StateAction.movePlayer; //Кто первый ходит?
+        stateAction = (notation.InGameColor.ToString() == gameManager.GetMyColor()) ? StateAction.movePlayer : StateAction.moveBot; //Кто первый ходит?
         teamColor = notation.InGameColor;
-        currentFigure = null;
-        this.notation = notation;
+        currentFigure = null;  
     }
 
     public void ActionPlayerWithBot()
     {
-        if (stateAction == StateAction.movePlayer)
+        if (stateAction == StateAction.mateWhite)
+        {
+            //действия для мата чёрными
+            return;
+        }
+        else if (stateAction == StateAction.mateBlack)
+        {
+            //действия для мата белыми
+            return;
+        }
+        else if (stateAction == StateAction.pate)
+        {
+            //действия для пата
+            return;
+        }
+        else if (stateAction == StateAction.movePlayer)
         {
             switch (stateMove)
             {
@@ -71,11 +86,10 @@ public class PieceM
         else if (stateAction == StateAction.moveBot)
         {
             System.Random random = new System.Random();
-            Thread.Sleep(random.Next(400, 4000));
+            Thread.Sleep(random.Next(1, 4000));
             BotMove();
         }
-        else Debug.Log(gameManager.GameState());
-        return;
+        else checkOnEndGame();  //случай, если запущена игра с матом или патом
     }
 
     private void PickUpFigure()
@@ -121,21 +135,22 @@ public class PieceM
     //Ход бота
     private void BotMove()
     {
-        if (gameManager.GameState() == "MATE\nYOU WIN!")
-        {
-            stateAction = StateAction.endGame;
-            return;
-        }
         notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(gameManager.GetGameFen());
+        if (gameManager.GameState() == "CHECK")
+        {
+            //действия при шахе
+            Debug.Log("Шах от игрока");
+        }
         gameManager.BotMove();
+        if (gameManager.GameState() == "CHECK")
+        {
+            //действия при шахе
+            Debug.Log("Шах от бота");
+        }
         Debug.Log("Бот сделал ход " + gameManager.GetLastMove());
         GenerateFigureMove(new Parser(gameManager.GetLastMove(), gameManager.GetOpponentColor()));
+        checkOnEndGame();
         notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(gameManager.GetGameFen());
-        if (gameManager.GameState() == "MATE\nYOU LOSE!")
-        {
-            stateAction = StateAction.endGame;
-            return;
-        }
     }
 
     private void SetTransformField()
@@ -280,6 +295,7 @@ public class PieceM
             gameManager.PlayerMove(chessMove);
             stateAction = StateAction.moveBot;
             stateMove = StateMove.pick;
+            checkOnEndGame();
             currentFigure = null;
         }
         else if (typeOfGame == TypeOfGame.PlayerVsBot && stateAction == StateAction.moveBot && stateMove != StateMove.Castling)
@@ -296,5 +312,23 @@ public class PieceM
     public static void setState(StateAction _stateAction)
     {
         stateAction = _stateAction;
+    }
+
+    public void checkOnEndGame()
+    {
+        if (gameManager.GameState() == "MATE\nYOU LOSE!")  //в будущем поменять на выграли белые
+        {
+            stateAction = StateAction.mateBlack;
+        }
+
+        if (gameManager.GameState() == "MATE\nYOU WIN!")  //в будущем поменять на выграли чёрные
+        {
+            stateAction = StateAction.mateWhite;
+        }
+
+        if (gameManager.GameState() == "PATE")  //в будущем поменять на выграли чёрные
+        {
+            stateAction = StateAction.pate;
+        }
     }
 }

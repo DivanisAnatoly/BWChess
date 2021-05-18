@@ -38,7 +38,7 @@ public class ChessGameControl : MonoBehaviour
 
     private void StartNewGame()
     {
-        gameManager.StartGame(fen, "white");
+        gameManager.StartGame(fen, "black");
         typeOfGame = TypeOfGame.PlayerVsBot;
         pieceMoves = new PieceM(gameManager, typeOfGame, Notation);
     }

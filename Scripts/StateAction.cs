@@ -2,5 +2,7 @@
 {
     moveBot,
     movePlayer,
-    endGame
+    mateWhite,
+    mateBlack,
+    pate
 }
