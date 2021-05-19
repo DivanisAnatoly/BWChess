@@ -14,7 +14,7 @@ public class Square
             objectOnTheWay = ChessGameControl.dictionaryOfFigures[currentMove.SquareToMove.name];  //Объект, который может существовать
             if (objectOnTheWay)
             {
-                PlaceAMSquare(currentMove.SquareToMove, "Attack");
+                PlaceAMSquare(currentMove.SquareToMove, ChessGameControl.attack);
                 currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
             }
             else
@@ -31,16 +31,34 @@ public class Square
             checkVar = true;
         foreach (Parser currentMove in parser)
         {   
-            PlaceAMSquare(currentMove.SquareToMove, "Movement");
+            PlaceAMSquare(currentMove.SquareToMove, ChessGameControl.movement);
             currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
         }
         return checkVar;
     }
 
-    //Меняет спрайт указанной клетки на указанный спрайт, обычно используется для замены Attack/Movement спрайта
-    static public void PlaceAMSquare(GameObject square, string spriteName)
+    public void LightUpTrackSquare(Parser chessMove)
     {
-        GameObject Sprite = GameObject.Find(spriteName);
+        PlaceAMSquare(chessMove.SquareToMove, ChessGameControl.track);
+        PlaceAMSquare(chessMove.SquareFromMove, ChessGameControl.track);
+        chessMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.5f);
+        chessMove.SquareFromMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.5f);
+        return;
+    }
+
+    public void ReverseLightUpTrackSquare(Parser chessMove)
+    {
+        PlaceAMSquare(chessMove.SquareToMove, ChessGameControl.movement);
+        PlaceAMSquare(chessMove.SquareFromMove, ChessGameControl.movement);
+        chessMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
+        chessMove.SquareFromMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
+        return;
+    }
+
+    //Меняет спрайт указанной клетки на указанный спрайт, обычно используется для замены Attack/Movement спрайта
+    static public void PlaceAMSquare(GameObject square, GameObject spriteName)
+    {
+        GameObject Sprite = spriteName;
         square.GetComponent<SpriteRenderer>().sprite = Sprite.GetComponent<SpriteRenderer>().sprite;
     }
 }

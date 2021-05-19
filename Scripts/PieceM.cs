@@ -191,6 +191,8 @@ public class PieceM
     //Метод автоматического перемещения фигур
     private void GenerateFigureMove(Parser chessMove)
     {
+   
+        //square.ReverseLightUpTrackSquare(new Parser(gameManager.GetLastMove(), gameManager.GetOpponentColor()));
         Debug.Log($"Генерация {chessMove.chessmove}");
         //Проверка, на кликнутой клетке есть ли фигура и что с ней делать?
         constraints.CheckTryCutFigure(ChessGameControl.dictionaryOfFigures[chessMove.SquareToMove.name]);
@@ -198,8 +200,9 @@ public class PieceM
         ChessGameControl.dictionaryOfFigures[chessMove.SquareFromMove.name] = null;
         chessMove.Name.name = chessMove.Name.name[0] + chessMove.SquareToMove.name;
         ChessGameControl.dictionaryOfFigures[chessMove.SquareToMove.name] = chessMove.Name;
+        //square.LightUpTrackSquare(chessMove);
         if (CheckTransformMove(chessMove)) return;
-        TryGenerateEnPassan(chessMove);                                          //Нужно доделать
+        TryGenerateEnPassan(chessMove);                                    
         if (TryGenerateCastlingMove(chessMove.Name.name[0].ToString() + chessMove.SquareFromMove.name + chessMove.SquareToMove.name))
         {
             stateMove = StateMove.pick;

@@ -15,13 +15,16 @@ public class ChessGameControl : MonoBehaviour
     private GameManager gameManager;
     private PieceCreator pieceCreator;
     static public Dictionary<string, GameObject> dictionaryOfFigures;
-    
+    static public GameObject movement;
+    static public GameObject attack;
+    static public GameObject track;
+
     TypeOfGame typeOfGame;
 
     public ForsythEdwardsNotation Notation { get; private set; }
 
     void Awake()
-    {
+    { 
         Notation = JsonConvert.DeserializeObject<ForsythEdwardsNotation>(fen);
         dictionaryOfFigures = new Dictionary<string, GameObject>();
         pieceCreator = new PieceCreator(Notation.PiecePosition);
@@ -33,6 +36,9 @@ public class ChessGameControl : MonoBehaviour
     private void Start()
     {
         gameManager = new GameManager();
+        movement = GameObject.Find("Movement");
+        attack = GameObject.Find("Attack");
+        track = GameObject.Find("Track");
         StartNewGame();
     }
 
