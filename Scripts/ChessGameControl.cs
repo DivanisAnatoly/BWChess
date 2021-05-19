@@ -9,8 +9,8 @@ using Newtonsoft.Json;
 
 public class ChessGameControl : MonoBehaviour
 {
-    private string fen = @"{ 'PiecePosition': '1111k111/8/8/8/p1p1p1p1/8/PPPPPPPP/R111K11R','InGameColor':'white',
-                                                'Castling': '----','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }";
+    private string fen = @"{ 'PiecePosition': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR','InGameColor':'white',
+                                                'Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }";
     private PieceM pieceMoves;
     private GameManager gameManager;
     private PieceCreator pieceCreator;
@@ -39,12 +39,13 @@ public class ChessGameControl : MonoBehaviour
         movement = GameObject.Find("Movement");
         attack = GameObject.Find("Attack");
         track = GameObject.Find("Track");
+        Debug.Log(track);
         StartNewGame();
     }
 
     private void StartNewGame()
     {
-        gameManager.StartGame(fen, "black");
+        gameManager.StartGame(fen, "white");
         typeOfGame = TypeOfGame.PlayerVsBot;
         pieceMoves = new PieceM(gameManager, typeOfGame, Notation);
     }

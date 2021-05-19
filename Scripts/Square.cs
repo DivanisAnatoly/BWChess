@@ -58,7 +58,6 @@ public class Square
     //Меняет спрайт указанной клетки на указанный спрайт, обычно используется для замены Attack/Movement спрайта
     static public void PlaceAMSquare(GameObject square, GameObject spriteName)
     {
-        GameObject Sprite = spriteName;
-        square.GetComponent<SpriteRenderer>().sprite = Sprite.GetComponent<SpriteRenderer>().sprite;
+        square.GetComponent<SpriteRenderer>().sprite = spriteName.GetComponent<SpriteRenderer>().sprite;
     }
 }

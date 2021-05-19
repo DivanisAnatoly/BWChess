@@ -43,17 +43,17 @@ public class PieceM
     {
         if (stateAction == StateAction.mateWhite)
         {
-            //действия для мата чёрными
+            EndGame.OpenWhiteEndGame();
             return;
         }
         else if (stateAction == StateAction.mateBlack)
         {
-            //действия для мата белыми
+            EndGame.OpenBlackEndGame();
             return;
         }
         else if (stateAction == StateAction.pate)
         {
-            //действия для пата
+            EndGame.OpenDrawEndGame();
             return;
         }
         else if (stateAction == StateAction.movePlayer)
@@ -86,7 +86,7 @@ public class PieceM
         else if (stateAction == StateAction.moveBot)
         {
             System.Random random = new System.Random();
-            Thread.Sleep(random.Next(1, 4000));
+          
             BotMove();
         }
         else checkOnEndGame();  //случай, если запущена игра с матом или патом
@@ -104,7 +104,7 @@ public class PieceM
             list += " " + i;
         Debug.Log(list);
         transformFigure.IncreaseFigure(currentFigure);                                          //Увеличение кликнутой фигуры
-        square.HighlightSquare(Parser);                                                          //Подсветка возможных ходов
+        square.HighlightSquare(Parser);                                                         //Подсветка возможных ходов
         stateMove = StateMove.drop;                                                             //Изменить состояние фигуры в состояние падения
         Debug.Log("pickedUp " + currentFigure.name);
     }
@@ -142,6 +142,7 @@ public class PieceM
             Debug.Log("Шах от игрока");
         }
         gameManager.BotMove();
+        square.LightUpTrackSquare(new Parser(gameManager.GetLastMove(), gameManager.GetOpponentColor()));
         if (gameManager.GameState() == "CHECK")
         {
             //действия при шахе
@@ -191,8 +192,6 @@ public class PieceM
     //Метод автоматического перемещения фигур
     private void GenerateFigureMove(Parser chessMove)
     {
-   
-        //square.ReverseLightUpTrackSquare(new Parser(gameManager.GetLastMove(), gameManager.GetOpponentColor()));
         Debug.Log($"Генерация {chessMove.chessmove}");
         //Проверка, на кликнутой клетке есть ли фигура и что с ней делать?
         constraints.CheckTryCutFigure(ChessGameControl.dictionaryOfFigures[chessMove.SquareToMove.name]);
@@ -200,7 +199,6 @@ public class PieceM
         ChessGameControl.dictionaryOfFigures[chessMove.SquareFromMove.name] = null;
         chessMove.Name.name = chessMove.Name.name[0] + chessMove.SquareToMove.name;
         ChessGameControl.dictionaryOfFigures[chessMove.SquareToMove.name] = chessMove.Name;
-        //square.LightUpTrackSquare(chessMove);
         if (CheckTransformMove(chessMove)) return;
         TryGenerateEnPassan(chessMove);                                    
         if (TryGenerateCastlingMove(chessMove.Name.name[0].ToString() + chessMove.SquareFromMove.name + chessMove.SquareToMove.name))
@@ -295,6 +293,8 @@ public class PieceM
         {
             Debug.Log("FLIP");
             Debug.Log("Игрок сделал ход " + chessMove);
+            if (gameManager.GetLastMove() != "there is no last move") 
+                square.ReverseLightUpTrackSquare(new Parser(gameManager.GetLastMove(), gameManager.GetOpponentColor()));
             gameManager.PlayerMove(chessMove);
             stateAction = StateAction.moveBot;
             stateMove = StateMove.pick;
