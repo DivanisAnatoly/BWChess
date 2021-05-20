@@ -334,4 +334,14 @@ public class PieceM
             stateAction = StateAction.pate;
         }
     }
+
+    public static void SetState(StateAction _stateAction)
+    {
+        stateAction = _stateAction;
+    }
+
+    public static StateAction GetState()
+    {
+        return stateAction;
+    }
 }
