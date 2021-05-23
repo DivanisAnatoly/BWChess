@@ -41,7 +41,7 @@ public struct Parser
             chessMove = chessMove.Remove(chessMove.Length - 1);
         }
         else PossibilityTransform = '.';
-        this.Name = GameObject.Find(chessMove.Substring(0, 3));
+        this.Name = ChessGameControl.dictionaryOfFigures[chessMove.Substring(1, 2)];
         this.SquareFromMove = GameObject.Find(chessMove.Substring(1, 2));
         this.SquareToMove = GameObject.Find(chessMove.Substring(3));
     }

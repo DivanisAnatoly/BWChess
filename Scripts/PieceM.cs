@@ -113,7 +113,7 @@ public class PieceM
     {
         constraints.GetClickSquare(Clicks.GetClickPosition(), out GameObject clickedSquare);                            //Получение клетки, по которой совершён клик
         transformFigure.DecreaseFigure(currentFigure);                                                                  //Уменьшение кликнутой фигуры
-        if (!square.ReverseColorSquare(clickedSquare, Parser)) clickedSquare = null;
+        if (!square.ReverseColorSquare(clickedSquare, Parser, gameManager.GetLastMove(), gameManager.GetOpponentColor())) clickedSquare = null;
         if (!CheckSquareOnGenerateMove(clickedSquare)) return;
         GenerateFigureMove(new Parser(currentFigure.name + clickedSquare.name, gameManager.GetInGameColor()));          //Генерация хода
         CheckStatusGame();                                                                                              //Проверка статуса игры
@@ -308,11 +308,11 @@ public class PieceM
             currentFigure = null;
         }
     }
-    public static StateAction getState()
+    public static StateAction GetState()
     {
         return stateAction;
     }
-    public static void setState(StateAction _stateAction)
+    public static void SetState(StateAction _stateAction)
     {
         stateAction = _stateAction;
     }
@@ -333,15 +333,5 @@ public class PieceM
         {
             stateAction = StateAction.pate;
         }
-    }
-
-    public static void SetState(StateAction _stateAction)
-    {
-        stateAction = _stateAction;
-    }
-
-    public static StateAction GetState()
-    {
-        return stateAction;
     }
 }

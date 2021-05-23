@@ -24,7 +24,7 @@ public class Square
     }
 
     //Изменение цвета клетки в исходное состояние и установка прозрачности клеток
-    public bool ReverseColorSquare(GameObject clickedSquare, List<Parser> parser)
+    public bool ReverseColorSquare(GameObject clickedSquare, List<Parser> parser, string lastMove, string OpponentColor)
     {
         bool checkVar = false;
         if (clickedSquare && clickedSquare.GetComponent<SpriteRenderer>().color == new Color(1f, 1f, 1f, 1f)) 
@@ -34,6 +34,7 @@ public class Square
             PlaceAMSquare(currentMove.SquareToMove, ChessGameControl.movement);
             currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
         }
+        if (!checkVar) LightUpTrackSquare(new Parser(lastMove, OpponentColor));
         return checkVar;
     }
 

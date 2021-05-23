@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using ChessLibrary;
 using Newtonsoft.Json;
+using UnityEngine.UI;
 
 
 public class ChessGameControl : MonoBehaviour
@@ -18,7 +19,7 @@ public class ChessGameControl : MonoBehaviour
     static public GameObject movement;
     static public GameObject attack;
     static public GameObject track;
-
+    private string playerColor = null;
     TypeOfGame typeOfGame;
 
     public ForsythEdwardsNotation Notation { get; private set; }
@@ -39,20 +40,28 @@ public class ChessGameControl : MonoBehaviour
         movement = GameObject.Find("Movement");
         attack = GameObject.Find("Attack");
         track = GameObject.Find("Track");
-        Debug.Log(track);
-        StartNewGame();
     }
 
     private void StartNewGame()
     {
-        gameManager.StartGame(fen, "white");
-        typeOfGame = TypeOfGame.PlayerVsBot;
-        pieceMoves = new PieceM(gameManager, typeOfGame, Notation);
+        if (playerColor != null)
+        {
+            Debug.Log(playerColor);
+            gameManager.StartGame(fen, playerColor);
+            typeOfGame = TypeOfGame.PlayerVsBot;
+            pieceMoves = new PieceM(gameManager, typeOfGame, Notation);
+        }
     }
 
     // Update is called once per frame
     private void Update()
     {
+        if (playerColor == null)
+        {
+            if (SideChoice.resultSideChoice.GetComponent<Text>().text == "white") { playerColor = "white"; StartNewGame(); } 
+            else if (SideChoice.resultSideChoice.GetComponent<Text>().text == "black") { playerColor = "black"; StartNewGame(); }
+        }
+        else
         pieceMoves.ActionPlayerWithBot();
     }
 

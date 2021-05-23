@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 public class SideChoice : MonoBehaviour
 {
-    GameObject  sideChoiceAnchor = GameObject.Find("SideChoiseAnchor");
-    GameObject result;
+    static GameObject sideChoiceAnchor;
+    static public GameObject resultSideChoice;
     GameObject gameChoice;
     SideChoice ChoiceW;
     SideChoice ChoiceB;
@@ -17,18 +17,18 @@ public class SideChoice : MonoBehaviour
         gameChoice.transform.localPosition = _position;
         gameChoice.transform.localScale = _scale;
         gameChoice.AddComponent<Image>();
-        gameChoice.GetComponent<Image>().sprite = (_name == "Black") ? Resources.Load<Sprite>(@"Fonts/Dark_Side") : Resources.Load<Sprite>(@"Fonts/Light_Side");
+        gameChoice.GetComponent<Image>().sprite = (_name == "black") ? Resources.Load<Sprite>(@"Fonts/Dark_Side") : Resources.Load<Sprite>(@"Fonts/Light_Side");
         gameChoice.AddComponent<Button>();
         gameChoice.GetComponent<Button>().transition = Selectable.Transition.SpriteSwap;
         var sprites = gameChoice.GetComponent<Button>().spriteState;
         switch (gameChoice.name) {
-            case "White":
+            case "white":
                 sprites.highlightedSprite = Resources.Load<Sprite>(@"Fonts/Light_Side_High");
                 sprites.disabledSprite = Resources.Load<Sprite>(@"Fonts/Light_Side");
                 sprites.selectedSprite = Resources.Load<Sprite>(@"Fonts/Light_Side");
                 sprites.disabledSprite = Resources.Load<Sprite>(@"Fonts/Light_Side");
                 break;
-            case "Black":
+            case "black":
                 sprites.highlightedSprite = Resources.Load<Sprite>(@"Fonts/Dark_Side_High");
                 sprites.disabledSprite = Resources.Load<Sprite>(@"Fonts/Dark_Side");
                 sprites.selectedSprite = Resources.Load<Sprite>(@"Fonts/Dark_Side");
@@ -43,11 +43,10 @@ public class SideChoice : MonoBehaviour
         Vector2 positionW = new Vector2(-132.79f, 12.06f);
         Vector2 scaleB = new Vector2(2.5f, 4.5f);
         Vector2 positionB = new Vector2(114.3f, 12.06f);
-
-        result = GameObject.Find("ResultSideChoice");
-        Debug.Log(result.name);
-        ChoiceW = new SideChoice("White",scaleW, positionW);
-        ChoiceB = new SideChoice("Black",scaleB, positionB);
+        sideChoiceAnchor = GameObject.Find("SideChoiceAnchor");
+        resultSideChoice = GameObject.Find("ResultSideChoice");
+        ChoiceW = new SideChoice("white", scaleW, positionW);
+        ChoiceB = new SideChoice("black", scaleB, positionB);
         ChoiceW.gameChoice.GetComponent<Button>().onClick.AddListener(WhiteChoice);
         ChoiceB.gameChoice.GetComponent<Button>().onClick.AddListener(BlackChoice);
 
@@ -55,14 +54,14 @@ public class SideChoice : MonoBehaviour
 
     void WhiteChoice()
     {
-        result.GetComponent<Text>().text = "White";
+        resultSideChoice.GetComponent<Text>().text = "white";
         Destroy(ChoiceB.gameChoice);
         Destroy(ChoiceW.gameChoice);
         
     }
     void BlackChoice()
     {
-        result.GetComponent<Text>().text = "Black";
+        resultSideChoice.GetComponent<Text>().text = "black";
         Destroy(ChoiceB.gameChoice);
         Destroy(ChoiceW.gameChoice);
     }
