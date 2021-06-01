@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-
+using Newtonsoft.Json;
 public class Etudes : MonoBehaviour
 {
-    string filePath = @"Assets\Libraries\Fens.txt";
-    string[] etudes = {"{ 'PiecePosition': 'k1r5/p1r4R/QpPp1p2/1P1Bpp2/8/P7/2P2PP1/1K6', 'InGameColor':'white', 'Castling': '----', 'EnPassant': false, 'HalfMoveClock': 0, 'MoveNumber': 1 }",
+    string filePath = @"Assets\Libraries\fens1.Json";
+
+    List<string >etudes = new List<string>() {"{ 'PiecePosition': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR','InGameColor':'white','Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }",
+                      "{ 'PiecePosition': 'k1r5/p1r4R/QpPp1p2/1P1Bpp2/8/P7/2P2PP1/1K6', 'InGameColor':'white', 'Castling': '----', 'EnPassant': false, 'HalfMoveClock': 0, 'MoveNumber': 1 }",
                       "{ 'PiecePosition': '4r1k1/3R1ppp/6r1/p2P4/8/P1N3PP/3B1P1K/3Q2RB','InGameColor':'white','Castling': '----','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }",
                       "{ 'PiecePosition': '2k5/1p1p1p2/3K4/8/6Q1/8/8/8','InGameColor':'white','Castling': '----','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }",
                       "{ 'PiecePosition': '1kr5/1pp4Q/p1n5/q2r4/1b1p1NB1/1P1P2PP/PBPn4/K1R4R','InGameColor':'white','Castling': '----','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }",
@@ -21,9 +23,9 @@ public class Etudes : MonoBehaviour
                       "{ 'PiecePosition': 'r3nrk1/2p1Q1pp/p1b1Pp2/np4B1/6q1/1B3N2/PP3PPP/R3R1K1','InGameColor':'white','Castling': '----','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }",
                       "{ 'PiecePosition': '2nqk1n1/1rp1p3/5b2/8/8/2B5/3P1PR1/1N1KQN2','InGameColor':'white','Castling': '----','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }",
                       "{ 'PiecePosition': '4nkbq/4pppr/1R6/8/8/6r1/RPPP4/QBKN4','InGameColor':'white','Castling': '----','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }" };
-private void Start()
+    private void Start()
     {
-        
+
     }
     public void CatchFen(GameObject etude)
     {
@@ -31,21 +33,17 @@ private void Start()
     }
     private string readParticularFen(GameObject etude)
     {
-        //using (StreamReader fileIn = new StreamReader(filePath, System.Text.Encoding.Default))
-        //{
-            int i = 0;
-            string fen;
-            //while ((fen = fileIn.ReadLine()) != null)
-            while (i < 15)
+        int i = 0;
+        while (i < etudes.Count)
+        {
+            if (etude.name == i.ToString())
             {
-                fen = etudes[i];
-                i++;
-                if (etude.name == i.ToString())
-                {
-                    Debug.Log(etude.name + " --- " + fen);
-                    return fen;
-                }
+                Debug.Log(etude.name + " --- " + etudes[i]);
+                return etudes[i];
             }
-       return "{ 'PiecePosition': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR','InGameColor':'white','Castling': 'KQkq','EnPassant': false,'HalfMoveClock': 0,'MoveNumber': 1 }";
+            i++;
+        }
+        return etudes[0];
     }
-}
+}       
+
