@@ -34,7 +34,7 @@ public class Square
             PlaceAMSquare(currentMove.SquareToMove, ChessGameControl.movement);
             currentMove.SquareToMove.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
         }
-        if (!checkVar) LightUpTrackSquare(new Parser(lastMove, OpponentColor));
+        if (lastMove != "there is no last move" && !checkVar) LightUpTrackSquare(new Parser(lastMove, OpponentColor));
         return checkVar;
     }
 
