@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class Timer : MonoBehaviour
 {
     
-    private float timeInSecondsP = 420;
+    private float timeInSecondsP = 900;
     private StateAction stateAction;
     int minutsP;
     int secondsP;
@@ -24,7 +24,7 @@ public class Timer : MonoBehaviour
     {
         if (resultSideChoice.GetComponent<Text>().text != "")
         {
-            stateAction = PieceM.getState();
+            stateAction = PieceM.GetState();
             if (timeInSecondsP > 0 && stateAction == StateAction.movePlayer) // Дописать условие из библиотеки!!!!! Если ходит другой игрок - таймер замирает
             {
                 timeInSecondsP -= Time.deltaTime;
@@ -41,15 +41,16 @@ public class Timer : MonoBehaviour
             }
             else if (timeInSecondsP <= 0)
             {
-                if (resultSideChoice.GetComponent<Text>().text == "Black")
+                if (resultSideChoice.GetComponent<Text>().text == "black")
                 {
-                    PieceM.setState(StateAction.mateBlack);
+                    PieceM.SetState(StateAction.mateWhite);
+                    
                 }
-                else if (resultSideChoice.GetComponent<Text>().text == "White")
+                else if (resultSideChoice.GetComponent<Text>().text == "white")
                 {
-                    PieceM.setState(StateAction.mateWhite);
+                    PieceM.SetState(StateAction.mateBlack);   
                 }
-                Debug.Log("Mate, You lose.");
+                Debug.Log(PieceM.GetState() == StateAction.mateBlack ? "MateBlack" : "MateWhite"  );
             }
         }
     }

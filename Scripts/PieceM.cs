@@ -22,7 +22,7 @@ public class PieceM
     private StateMove stateMove;                                    //Состояние хода
     private static StateAction stateAction;                                //Кто ходит?
     private GameObject currentFigure;                               //Кликнутая фигура
-    private TeamColor teamColor;
+    private static TeamColor teamColor;
     private TypeOfGame typeOfGame;
 
 
@@ -334,13 +334,9 @@ public class PieceM
             stateAction = StateAction.pate;
         }
     }
-    public static void setState(StateAction _stateAction)
-    {
-        stateAction = _stateAction;
-    }
 
-    public static StateAction getState()
+    public static TeamColor GetColor()
     {
-        return stateAction;
+        return teamColor;
     }
 }
